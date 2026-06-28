@@ -1,0 +1,856 @@
+{
+  "project": {
+    "name": "Sistem Informasi Reservasi Bus - Dheemobilindo Raja Utama",
+    "alias": "FleetStream PRO",
+    "description": "Sistem manajemen reservasi bus berbasis web menggunakan framework CodeIgniter 3",
+    "version": "1.0.0"
+  },
+
+  "actors": [
+    {
+      "id": "ACT-01",
+      "name": "Customer / Tamu",
+      "type": "primary",
+      "description": "Pengguna publik yang ingin memesan bus. Melakukan autentikasi melalui Google OAuth Sign-In.",
+      "authentication_method": "Google OAuth 2.0"
+    },
+    {
+      "id": "ACT-02",
+      "name": "Admin Reservasi",
+      "type": "primary",
+      "description": "Administrator yang mengelola pemesanan, verifikasi pembayaran, data pelanggan, dan laporan pendapatan.",
+      "authentication_method": "Username & Password (bcrypt)"
+    },
+    {
+      "id": "ACT-03",
+      "name": "Admin Operasional",
+      "type": "primary",
+      "description": "Administrator yang mengelola data bus, driver, jadwal, dan laporan operasional.",
+      "authentication_method": "Username & Password (bcrypt)"
+    },
+    {
+      "id": "ACT-04",
+      "name": "Superadmin",
+      "type": "primary",
+      "description": "Administrator tertinggi yang memiliki akses penuh ke seluruh fitur sistem termasuk manajemen pengguna.",
+      "authentication_method": "Username & Password (bcrypt)"
+    },
+    {
+      "id": "ACT-05",
+      "name": "Sistem (Cron Job)",
+      "type": "secondary",
+      "description": "Proses otomatis yang menjalankan tugas terjadwal seperti pengiriman permintaan review dan reminder pelunasan."
+    }
+  ],
+
+  "use_cases": [
+    {
+      "id": "UC-01",
+      "name": "Melihat Halaman Beranda",
+      "description": "Pengguna dapat melihat halaman utama yang menampilkan informasi layanan bus, top 10 review, rata-rata rating, dan total jumlah review.",
+      "actors": ["ACT-01"],
+      "precondition": "Tidak ada (akses publik)",
+      "postcondition": "Halaman beranda ditampilkan",
+      "main_flow": [
+        "Pengguna mengakses halaman utama website",
+        "Sistem menampilkan informasi perusahaan, daftar review terbaik (rating ≥ 4), rata-rata rating, dan total review"
+      ],
+      "category": "Public"
+    },
+    {
+      "id": "UC-02",
+      "name": "Melihat Katalog Bus",
+      "description": "Pengguna dapat melihat daftar seluruh bus yang tersedia beserta detail dan status ketersediaannya.",
+      "actors": ["ACT-01"],
+      "precondition": "Tidak ada (akses publik)",
+      "postcondition": "Daftar bus ditampilkan dengan indikator ketersediaan",
+      "main_flow": [
+        "Pengguna membuka halaman katalog bus",
+        "Sistem menampilkan seluruh bus beserta informasi harga, kapasitas, tipe, dan fasilitas",
+        "Sistem menandai bus yang tidak tersedia untuk hari ini"
+      ],
+      "category": "Public"
+    },
+    {
+      "id": "UC-03",
+      "name": "Melihat Detail Bus",
+      "description": "Pengguna dapat melihat informasi lengkap sebuah bus termasuk foto, deskripsi, fasilitas, dan review dari pelanggan sebelumnya.",
+      "actors": ["ACT-01"],
+      "precondition": "Bus yang dipilih ada di database",
+      "postcondition": "Halaman detail bus ditampilkan",
+      "main_flow": [
+        "Pengguna memilih salah satu bus dari katalog",
+        "Sistem menampilkan detail bus beserta review terkait"
+      ],
+      "alternative_flow": [
+        "Jika bus tidak ditemukan, sistem menampilkan halaman 404"
+      ],
+      "category": "Public"
+    },
+    {
+      "id": "UC-04",
+      "name": "Cek Ketersediaan Bus",
+      "description": "Pengguna dapat memeriksa ketersediaan bus berdasarkan rentang tanggal keberangkatan dan pulang.",
+      "actors": ["ACT-01"],
+      "precondition": "Tidak ada (akses publik, endpoint AJAX)",
+      "postcondition": "Daftar bus yang tidak tersedia pada rentang tanggal ditampilkan",
+      "main_flow": [
+        "Pengguna memilih tanggal mulai dan tanggal selesai",
+        "Sistem memeriksa jadwal booking yang bentrok",
+        "Sistem mengembalikan daftar bus_id yang tidak tersedia (format JSON)"
+      ],
+      "category": "Public"
+    },
+    {
+      "id": "UC-05",
+      "name": "Login Customer (Google OAuth)",
+      "description": "Pelanggan melakukan autentikasi menggunakan akun Google untuk mengakses fitur pemesanan dan riwayat booking.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer memiliki akun Google",
+      "postcondition": "Session guest_email dan guest_name tersimpan, customer terdaftar/terperbarui di database",
+      "main_flow": [
+        "Customer mengklik tombol 'Sign In dengan Google'",
+        "Sistem mengarahkan ke halaman autentikasi Google",
+        "Customer memilih akun Google",
+        "Google mengirimkan JWT token callback",
+        "Sistem mendekode token, mengekstrak email dan nama",
+        "Jika customer baru, sistem mendaftarkan otomatis ke database",
+        "Jika customer sudah ada, sistem memperbarui data",
+        "Sistem membuat session guest dan mengarahkan ke halaman My Bookings"
+      ],
+      "category": "Authentication"
+    },
+    {
+      "id": "UC-06",
+      "name": "Logout Customer",
+      "description": "Pelanggan keluar dari sesi login Google.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer sudah login via Google",
+      "postcondition": "Session guest dihapus",
+      "main_flow": [
+        "Customer mengklik tombol logout",
+        "Sistem menghapus data session guest",
+        "Sistem mengarahkan ke halaman beranda"
+      ],
+      "category": "Authentication"
+    },
+    {
+      "id": "UC-07",
+      "name": "Melakukan Pemesanan Bus",
+      "description": "Customer yang sudah login dapat melakukan pemesanan bus dengan mengisi formulir booking lengkap.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer sudah login via Google, bus yang dipilih tersedia",
+      "postcondition": "Booking tersimpan dengan status 'pending', deadline pembayaran 2 jam ditetapkan",
+      "main_flow": [
+        "Customer membuka halaman booking dan memilih bus",
+        "Customer mengisi formulir: tanggal keberangkatan, tanggal pulang, lokasi penjemputan, tempat tujuan, tipe perjalanan (dalam/luar kota)",
+        "Sistem memvalidasi input dan mengecek ketersediaan bus (backend)",
+        "Sistem menghitung harga: harga_per_hari × jumlah_hari",
+        "Sistem menghasilkan kode unik 3 digit untuk verifikasi transfer",
+        "Sistem menghitung DP: 30% dari total + kode unik",
+        "Sistem menyimpan booking dengan batas waktu bayar 2 jam",
+        "Sistem mengarahkan ke halaman voucher"
+      ],
+      "alternative_flow": [
+        "Jika bus tidak tersedia pada tanggal yang dipilih, sistem menampilkan pesan error",
+        "Jika validasi form gagal, sistem menampilkan pesan error"
+      ],
+      "include": ["UC-04"],
+      "category": "Booking"
+    },
+    {
+      "id": "UC-08",
+      "name": "Melihat Voucher Booking",
+      "description": "Customer dapat melihat voucher konfirmasi pemesanan yang berisi detail booking dan informasi pembayaran.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer baru saja melakukan pemesanan",
+      "postcondition": "Voucher ditampilkan dengan detail pembayaran",
+      "main_flow": [
+        "Setelah booking berhasil, sistem menampilkan halaman voucher",
+        "Voucher menampilkan detail pemesanan, nominal DP, kode unik, dan instruksi pembayaran"
+      ],
+      "category": "Booking"
+    },
+    {
+      "id": "UC-09",
+      "name": "Melihat Riwayat Booking",
+      "description": "Customer dapat melihat seluruh daftar pemesanan yang pernah dilakukan.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer sudah login via Google",
+      "postcondition": "Daftar booking customer ditampilkan",
+      "main_flow": [
+        "Customer membuka halaman My Bookings",
+        "Sistem menampilkan semua booking milik customer berdasarkan email"
+      ],
+      "category": "Booking"
+    },
+    {
+      "id": "UC-10",
+      "name": "Melihat Detail Booking",
+      "description": "Customer dapat melihat detail lengkap dari sebuah pemesanan termasuk status pembayaran dan informasi DP.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer sudah login, booking milik customer tersebut",
+      "postcondition": "Detail booking ditampilkan",
+      "main_flow": [
+        "Customer memilih salah satu booking dari daftar",
+        "Sistem memvalidasi kepemilikan (customer_id cocok)",
+        "Sistem menampilkan detail booking, informasi pembayaran, kalkulasi DP"
+      ],
+      "alternative_flow": [
+        "Jika booking bukan milik customer, akses ditolak"
+      ],
+      "category": "Booking"
+    },
+    {
+      "id": "UC-11",
+      "name": "Upload Bukti Pembayaran DP",
+      "description": "Customer mengunggah bukti pembayaran uang muka (DP) sebesar 30% + kode unik.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer sudah login, booking berstatus 'pending', belum melewati deadline",
+      "postcondition": "Bukti terunggah, status booking berubah ke 'menunggu_verifikasi'",
+      "main_flow": [
+        "Customer membuka detail booking",
+        "Customer memilih file bukti pembayaran (jpg/jpeg/png, max 2MB)",
+        "Sistem mengunggah dan menyimpan file",
+        "Sistem mengubah status booking menjadi 'menunggu_verifikasi'"
+      ],
+      "category": "Pembayaran"
+    },
+    {
+      "id": "UC-12",
+      "name": "Upload Bukti Pelunasan",
+      "description": "Customer mengunggah bukti pelunasan sisa pembayaran setelah DP diverifikasi.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer sudah login, booking berstatus 'uang_muka_dibayarkan', belum melewati deadline pelunasan",
+      "postcondition": "Bukti pelunasan terunggah, status booking berubah ke 'menunggu_pelunasan'",
+      "main_flow": [
+        "Customer membuka detail booking",
+        "Customer memilih file bukti pelunasan (jpg/jpeg/png, max 2MB)",
+        "Sistem mengunggah dan menyimpan file",
+        "Sistem mengubah status booking menjadi 'menunggu_pelunasan'"
+      ],
+      "category": "Pembayaran"
+    },
+    {
+      "id": "UC-13",
+      "name": "Cetak Kwitansi",
+      "description": "Customer dapat mencetak kwitansi/receipt untuk booking yang sudah dibayar.",
+      "actors": ["ACT-01"],
+      "precondition": "Customer sudah login, booking memiliki status minimal 'uang_muka_dibayarkan'",
+      "postcondition": "Kwitansi ditampilkan untuk dicetak",
+      "main_flow": [
+        "Customer membuka detail booking",
+        "Customer mengklik tombol cetak kwitansi",
+        "Sistem memvalidasi status booking (harus salah satu dari: uang_muka_dibayarkan, menunggu_pelunasan, lunas, siap_berangkat, sedang_berlangsung, selesai)",
+        "Sistem menampilkan kwitansi yang siap dicetak"
+      ],
+      "category": "Pembayaran"
+    },
+    {
+      "id": "UC-14",
+      "name": "Memberikan Review",
+      "description": "Customer dapat memberikan rating dan ulasan setelah perjalanan selesai melalui link review unik.",
+      "actors": ["ACT-01"],
+      "precondition": "Perjalanan sudah selesai, customer memiliki token review yang valid",
+      "postcondition": "Review tersimpan, token review di-nullify (tidak bisa review ulang)",
+      "main_flow": [
+        "Customer menerima link review (via WhatsApp/email) dengan token unik",
+        "Customer membuka link review",
+        "Sistem memvalidasi token",
+        "Customer mengisi rating (1-5) dan teks ulasan",
+        "Customer mengirim review",
+        "Sistem menyimpan review dan menghapus token untuk mencegah review duplikat"
+      ],
+      "alternative_flow": [
+        "Jika token tidak valid atau sudah digunakan, sistem menampilkan pesan error"
+      ],
+      "category": "Review"
+    },
+    {
+      "id": "UC-15",
+      "name": "Login Admin",
+      "description": "Admin (Reservasi/Operasional/Superadmin) melakukan login ke panel administrasi.",
+      "actors": ["ACT-02", "ACT-03", "ACT-04"],
+      "precondition": "Admin memiliki akun yang terdaftar di tabel admin",
+      "postcondition": "Session admin tersimpan (admin_id, username, nama_lengkap, role, status='login')",
+      "main_flow": [
+        "Admin membuka halaman login",
+        "Admin memasukkan username dan password",
+        "Sistem memverifikasi username via Admin_model",
+        "Sistem memverifikasi password dengan password_verify()",
+        "Sistem membuat session dan mengarahkan ke dashboard"
+      ],
+      "alternative_flow": [
+        "Jika username tidak ditemukan atau password salah, sistem menampilkan pesan error"
+      ],
+      "category": "Authentication"
+    },
+    {
+      "id": "UC-16",
+      "name": "Logout Admin",
+      "description": "Admin keluar dari sesi panel administrasi.",
+      "actors": ["ACT-02", "ACT-03", "ACT-04"],
+      "precondition": "Admin sudah login",
+      "postcondition": "Session admin dihapus",
+      "main_flow": [
+        "Admin mengklik tombol logout",
+        "Sistem menghancurkan session",
+        "Sistem mengarahkan ke halaman login"
+      ],
+      "category": "Authentication"
+    },
+    {
+      "id": "UC-17",
+      "name": "Recovery Password Admin",
+      "description": "Admin dapat memulihkan password melalui fitur lupa password di halaman login.",
+      "actors": ["ACT-02", "ACT-03", "ACT-04"],
+      "precondition": "Admin mengetahui username-nya",
+      "postcondition": "Password admin diperbarui",
+      "main_flow": [
+        "Admin mengklik 'Lupa Password' di halaman login",
+        "Admin memasukkan username",
+        "Sistem memverifikasi username via AJAX",
+        "Jika valid, admin memasukkan password baru (minimal 4 karakter)",
+        "Sistem meng-hash password baru dengan bcrypt dan menyimpan ke database"
+      ],
+      "alternative_flow": [
+        "Jika username tidak ditemukan, sistem menampilkan pesan error"
+      ],
+      "category": "Authentication"
+    },
+    {
+      "id": "UC-18",
+      "name": "Melihat Dashboard",
+      "description": "Admin dapat melihat dashboard yang menampilkan ringkasan statistik operasional dan reservasi.",
+      "actors": ["ACT-02", "ACT-03", "ACT-04"],
+      "precondition": "Admin sudah login",
+      "postcondition": "Dashboard dengan statistik ditampilkan",
+      "main_flow": [
+        "Admin membuka halaman dashboard",
+        "Sistem menampilkan: total bus, total driver, jumlah booking bulanan, booker aktif, persentase pertumbuhan (vs bulan sebelumnya), pendapatan MTD, jadwal mendatang (5 terdekat), booking pending terbaru (5), jumlah pembayaran menunggu verifikasi, trip aktif hari ini, aktivitas terbaru (5 booking terakhir), dan grafik pendapatan 7 hari terakhir"
+      ],
+      "extend": ["Filter dashboard berdasarkan bulan dan tahun"],
+      "category": "Dashboard"
+    },
+    {
+      "id": "UC-19",
+      "name": "Mengelola Data Booking (CRUD)",
+      "description": "Admin Reservasi dapat melihat, menambah, mengedit, dan menghapus data pemesanan bus.",
+      "actors": ["ACT-02", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'reservasi' atau 'superadmin'",
+      "postcondition": "Data booking terupdate di database",
+      "main_flow": [
+        "Admin membuka halaman daftar booking",
+        "Sistem menampilkan seluruh booking dengan data bus dan customer",
+        "Admin dapat menambah booking baru (customer_id, bus_id, tanggal, lokasi, harga, status)",
+        "Admin dapat mengedit booking yang sudah ada",
+        "Admin dapat menghapus booking"
+      ],
+      "category": "Manajemen Reservasi"
+    },
+    {
+      "id": "UC-20",
+      "name": "Verifikasi Pembayaran",
+      "description": "Admin Reservasi memverifikasi bukti pembayaran DP dan pelunasan yang diunggah oleh customer.",
+      "actors": ["ACT-02", "ACT-04"],
+      "precondition": "Admin sudah login, ada booking berstatus 'menunggu_verifikasi' atau 'menunggu_pelunasan'",
+      "postcondition": "Status booking diperbarui sesuai keputusan (terima/tolak)",
+      "main_flow": [
+        "Admin membuka halaman persetujuan pembayaran",
+        "Sistem menampilkan daftar booking yang menunggu verifikasi",
+        "Admin memeriksa bukti pembayaran yang diunggah",
+        "Admin memilih aksi: Terima atau Tolak"
+      ],
+      "alternative_flow": [
+        {
+          "action": "Terima DP (status: menunggu_verifikasi)",
+          "flow": [
+            "Sistem mengubah status ke 'uang_muka_dibayarkan'",
+            "Sistem menghitung nominal DP yang diterima",
+            "Sistem menetapkan deadline pelunasan (H-3 sebelum keberangkatan, atau +2 jam jika ≤ 3 hari)"
+          ]
+        },
+        {
+          "action": "Terima Pelunasan (status: menunggu_pelunasan)",
+          "flow": [
+            "Sistem mengubah status ke 'siap_berangkat'",
+            "Sistem menandai pembayaran 'lunas'"
+          ]
+        },
+        {
+          "action": "Tolak Pembayaran",
+          "flow": [
+            "Sistem menolak pembayaran dengan alasan penolakan",
+            "Sistem mereset status booking",
+            "Sistem menghapus file bukti yang diunggah",
+            "Sistem memberikan deadline 2 jam baru untuk upload ulang"
+          ]
+        }
+      ],
+      "category": "Manajemen Reservasi"
+    },
+    {
+      "id": "UC-21",
+      "name": "Mengelola Data Customer (CRUD)",
+      "description": "Admin Reservasi dapat melihat, menambah, mengedit, dan menghapus data pelanggan.",
+      "actors": ["ACT-02", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'reservasi' atau 'superadmin'",
+      "postcondition": "Data customer terupdate di database",
+      "main_flow": [
+        "Admin membuka halaman daftar customer",
+        "Sistem menampilkan seluruh data pelanggan",
+        "Admin dapat menambah customer baru (nama, email, telepon, alamat)",
+        "Admin dapat mengedit data customer",
+        "Admin dapat menghapus customer"
+      ],
+      "alternative_flow": [
+        "Jika customer memiliki riwayat booking, penghapusan ditolak (referential integrity)"
+      ],
+      "category": "Manajemen Reservasi"
+    },
+    {
+      "id": "UC-22",
+      "name": "Mengelola Data Bus (CRUD)",
+      "description": "Admin Operasional dapat melihat, menambah, mengedit, dan menghapus data bus.",
+      "actors": ["ACT-03", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'operasional' atau 'superadmin'",
+      "postcondition": "Data bus terupdate di database",
+      "main_flow": [
+        "Admin membuka halaman daftar bus",
+        "Sistem menampilkan seluruh data bus",
+        "Admin dapat menambah bus baru (nama, kapasitas, tipe, deskripsi, fasilitas, harga dalam/luar kota, status, foto)",
+        "Admin dapat mengedit data bus (foto lama dihapus jika ada foto baru)",
+        "Admin dapat menghapus bus beserta file fotonya"
+      ],
+      "business_rules": [
+        "Upload foto: format gif/jpg/jpeg/png, maksimal 2MB, nama file dienkripsi",
+        "Fasilitas disimpan sebagai comma-separated values"
+      ],
+      "category": "Manajemen Operasional"
+    },
+    {
+      "id": "UC-23",
+      "name": "Mengelola Data Driver (CRUD)",
+      "description": "Admin Operasional dapat melihat, menambah, mengedit, dan menghapus data driver/sopir.",
+      "actors": ["ACT-03", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'operasional' atau 'superadmin'",
+      "postcondition": "Data driver terupdate di database",
+      "main_flow": [
+        "Admin membuka halaman daftar driver",
+        "Sistem menampilkan seluruh driver beserta bus yang ditugaskan",
+        "Admin dapat menambah driver baru (nama, telepon, bus_id, status)",
+        "Admin dapat mengedit data driver",
+        "Admin dapat menghapus driver"
+      ],
+      "category": "Manajemen Operasional"
+    },
+    {
+      "id": "UC-24",
+      "name": "Mengelola Jadwal (CRUD)",
+      "description": "Admin Operasional dapat melihat, menambah, mengedit, dan menghapus jadwal perjalanan bus.",
+      "actors": ["ACT-03", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'operasional' atau 'superadmin'",
+      "postcondition": "Data jadwal terupdate di database",
+      "main_flow": [
+        "Admin membuka halaman daftar jadwal",
+        "Sistem menampilkan seluruh jadwal beserta data booking, bus, dan driver",
+        "Admin dapat menambah jadwal baru (booking_id, bus_id, driver_id, tanggal mulai, tanggal selesai)",
+        "Sistem memeriksa konflik jadwal sebelum menyimpan",
+        "Admin dapat mengedit jadwal (konflik dicek ulang, excluding jadwal saat ini)",
+        "Admin dapat menghapus jadwal"
+      ],
+      "alternative_flow": [
+        "Jika terjadi konflik jadwal (bus/driver sudah dijadwalkan pada tanggal tersebut), sistem menampilkan pesan error dan menolak penyimpanan"
+      ],
+      "include": ["Pengecekan konflik jadwal (check_conflict)"],
+      "category": "Manajemen Operasional"
+    },
+    {
+      "id": "UC-25",
+      "name": "Melihat Laporan Pendapatan",
+      "description": "Admin Reservasi dapat melihat laporan pendapatan berdasarkan filter tanggal dan status booking.",
+      "actors": ["ACT-02", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'reservasi' atau 'superadmin'",
+      "postcondition": "Laporan pendapatan ditampilkan",
+      "main_flow": [
+        "Admin membuka halaman laporan pendapatan",
+        "Admin dapat memfilter berdasarkan rentang tanggal dan status booking",
+        "Sistem menampilkan data pendapatan dari booking"
+      ],
+      "extend": ["UC-26"],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-26",
+      "name": "Export Laporan Pendapatan ke Excel",
+      "description": "Admin Reservasi dapat mengekspor laporan pendapatan dalam format file Excel (.xls).",
+      "actors": ["ACT-02", "ACT-04"],
+      "precondition": "Data laporan pendapatan tersedia",
+      "postcondition": "File Excel terunduh",
+      "main_flow": [
+        "Admin mengklik tombol export/print pada halaman laporan pendapatan",
+        "Sistem menghasilkan file Excel (.xls) berisi data laporan",
+        "Browser mengunduh file"
+      ],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-27",
+      "name": "Melihat Laporan Transaksi Customer",
+      "description": "Admin Reservasi dapat melihat laporan transaksi per pelanggan berdasarkan filter tanggal.",
+      "actors": ["ACT-02", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'reservasi' atau 'superadmin'",
+      "postcondition": "Laporan transaksi customer ditampilkan",
+      "main_flow": [
+        "Admin membuka halaman laporan transaksi customer",
+        "Admin dapat memfilter berdasarkan rentang tanggal",
+        "Sistem menampilkan data transaksi per pelanggan"
+      ],
+      "extend": ["UC-28"],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-28",
+      "name": "Export Laporan Transaksi Customer ke Excel",
+      "description": "Admin Reservasi dapat mengekspor laporan transaksi customer dalam format Excel.",
+      "actors": ["ACT-02", "ACT-04"],
+      "precondition": "Data laporan transaksi customer tersedia",
+      "postcondition": "File Excel terunduh",
+      "main_flow": [
+        "Admin mengklik tombol export pada halaman laporan customer",
+        "Sistem menghasilkan file Excel dan browser mengunduhnya"
+      ],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-29",
+      "name": "Melihat Laporan Utilisasi Bus",
+      "description": "Admin Operasional dapat melihat laporan penggunaan/utilisasi bus berdasarkan filter tanggal.",
+      "actors": ["ACT-03", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'operasional' atau 'superadmin'",
+      "postcondition": "Laporan utilisasi bus ditampilkan",
+      "main_flow": [
+        "Admin membuka halaman laporan utilisasi bus",
+        "Admin dapat memfilter berdasarkan rentang tanggal",
+        "Sistem menampilkan data utilisasi setiap bus"
+      ],
+      "extend": ["UC-30"],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-30",
+      "name": "Export Laporan Utilisasi Bus ke Excel",
+      "description": "Admin Operasional dapat mengekspor laporan utilisasi bus dalam format Excel.",
+      "actors": ["ACT-03", "ACT-04"],
+      "precondition": "Data laporan utilisasi bus tersedia",
+      "postcondition": "File Excel terunduh",
+      "main_flow": [
+        "Admin mengklik tombol export pada halaman laporan bus",
+        "Sistem menghasilkan file Excel dan browser mengunduhnya"
+      ],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-31",
+      "name": "Melihat Laporan Aktivitas Driver",
+      "description": "Admin Operasional dapat melihat laporan aktivitas driver/sopir berdasarkan filter tanggal.",
+      "actors": ["ACT-03", "ACT-04"],
+      "precondition": "Admin sudah login dengan role 'operasional' atau 'superadmin'",
+      "postcondition": "Laporan aktivitas driver ditampilkan",
+      "main_flow": [
+        "Admin membuka halaman laporan aktivitas driver",
+        "Admin dapat memfilter berdasarkan rentang tanggal",
+        "Sistem menampilkan data aktivitas setiap driver"
+      ],
+      "extend": ["UC-32"],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-32",
+      "name": "Export Laporan Aktivitas Driver ke Excel",
+      "description": "Admin Operasional dapat mengekspor laporan aktivitas driver dalam format Excel.",
+      "actors": ["ACT-03", "ACT-04"],
+      "precondition": "Data laporan aktivitas driver tersedia",
+      "postcondition": "File Excel terunduh",
+      "main_flow": [
+        "Admin mengklik tombol export pada halaman laporan driver",
+        "Sistem menghasilkan file Excel dan browser mengunduhnya"
+      ],
+      "category": "Laporan"
+    },
+    {
+      "id": "UC-33",
+      "name": "Mengelola Akun Admin (User Management)",
+      "description": "Superadmin dapat melihat, menambah, mengedit, dan menghapus akun admin (Reservasi, Operasional, Superadmin).",
+      "actors": ["ACT-04"],
+      "precondition": "Admin sudah login dengan role 'superadmin'",
+      "postcondition": "Data akun admin terupdate di database",
+      "main_flow": [
+        "Superadmin membuka halaman manajemen pengguna",
+        "Sistem menampilkan daftar semua admin beserta jumlah per role",
+        "Superadmin dapat menambah admin baru (username unik, password bcrypt, nama lengkap, role)",
+        "Superadmin dapat mengedit data admin (cek duplikat username excluding self, password opsional)",
+        "Superadmin dapat menghapus admin"
+      ],
+      "alternative_flow": [
+        "Tidak dapat menghapus akun sendiri (safety guard)",
+        "Tidak dapat menghapus superadmin terakhir"
+      ],
+      "category": "Manajemen Pengguna"
+    },
+    {
+      "id": "UC-34",
+      "name": "Reset Password Admin",
+      "description": "Superadmin dapat mereset password admin lain ke password default ({username}123).",
+      "actors": ["ACT-04"],
+      "precondition": "Admin sudah login dengan role 'superadmin'",
+      "postcondition": "Password admin target direset ke default",
+      "main_flow": [
+        "Superadmin mengklik tombol reset password pada akun admin tertentu",
+        "Sistem mereset password ke '{username}123' (contoh: admin123)",
+        "Sistem menampilkan password baru yang telah direset dalam flash message"
+      ],
+      "category": "Manajemen Pengguna"
+    },
+    {
+      "id": "UC-35",
+      "name": "Auto-Cancel Booking Expired",
+      "description": "Sistem secara otomatis membatalkan booking yang telah melewati batas waktu pembayaran.",
+      "actors": ["ACT-05"],
+      "precondition": "Ada booking dengan deadline yang telah terlewati",
+      "postcondition": "Booking yang expired dibatalkan otomatis",
+      "main_flow": [
+        "Sistem memeriksa deadline pembayaran setiap kali halaman booking/home diakses (via auto_check_deadlines)",
+        "Booking berstatus 'pending' yang melewati deadline 2 jam → otomatis 'batal'",
+        "Booking berstatus 'uang_muka_dibayarkan' yang melewati deadline pelunasan → otomatis 'batal' dengan denda Rp50.000"
+      ],
+      "trigger": "Dipanggil di constructor Booking.php dan Home.php pada setiap request",
+      "category": "Sistem Otomatis"
+    },
+    {
+      "id": "UC-36",
+      "name": "Kirim Permintaan Review Otomatis",
+      "description": "Sistem secara otomatis mengirimkan permintaan review kepada customer setelah perjalanan selesai.",
+      "actors": ["ACT-05"],
+      "precondition": "Booking berstatus 'selesai', tanggal pulang sudah terlewati, review belum diminta",
+      "postcondition": "Token review MD5 dihasilkan, ditandai is_review_requested=1, notifikasi terkirim (WhatsApp/email simulasi)",
+      "main_flow": [
+        "Cron job dijalankan (send_review_requests)",
+        "Sistem mencari booking dengan status 'selesai' yang tanggal pulangnya sudah lewat dan belum diminta review",
+        "Untuk setiap booking, sistem menghasilkan token review MD5",
+        "Sistem menyimpan token ke database",
+        "Sistem mengirim link review ke customer (simulasi WhatsApp/email)",
+        "Sistem menandai is_review_requested = 1"
+      ],
+      "category": "Sistem Otomatis"
+    },
+    {
+      "id": "UC-37",
+      "name": "Kirim Reminder Pelunasan Otomatis",
+      "description": "Sistem secara otomatis mengirimkan pengingat pelunasan pembayaran H-10 sebelum keberangkatan.",
+      "actors": ["ACT-05"],
+      "precondition": "Booking berstatus 'uang_muka_dibayarkan', keberangkatan tepat 10 hari lagi",
+      "postcondition": "Notifikasi reminder terkirim (WhatsApp/email simulasi)",
+      "main_flow": [
+        "Cron job dijalankan (reminder_pelunasan)",
+        "Sistem mencari booking dengan status 'uang_muka_dibayarkan' yang keberangkatannya tepat 10 hari lagi",
+        "Sistem mengirim reminder berisi sisa pembayaran dan link detail booking ke customer (simulasi WhatsApp/email)"
+      ],
+      "category": "Sistem Otomatis"
+    }
+  ],
+
+  "relationships": [
+    {
+      "type": "include",
+      "from": "UC-07",
+      "to": "UC-04",
+      "description": "Melakukan Pemesanan Bus <<include>> Cek Ketersediaan Bus"
+    },
+    {
+      "type": "include",
+      "from": "UC-07",
+      "to": "UC-05",
+      "description": "Melakukan Pemesanan Bus <<include>> Login Customer (Google OAuth)"
+    },
+    {
+      "type": "extend",
+      "from": "UC-26",
+      "to": "UC-25",
+      "description": "Export Laporan Pendapatan <<extend>> Melihat Laporan Pendapatan"
+    },
+    {
+      "type": "extend",
+      "from": "UC-28",
+      "to": "UC-27",
+      "description": "Export Laporan Transaksi Customer <<extend>> Melihat Laporan Transaksi Customer"
+    },
+    {
+      "type": "extend",
+      "from": "UC-30",
+      "to": "UC-29",
+      "description": "Export Laporan Utilisasi Bus <<extend>> Melihat Laporan Utilisasi Bus"
+    },
+    {
+      "type": "extend",
+      "from": "UC-32",
+      "to": "UC-31",
+      "description": "Export Laporan Aktivitas Driver <<extend>> Melihat Laporan Aktivitas Driver"
+    },
+    {
+      "type": "extend",
+      "from": "UC-18",
+      "to": "UC-18",
+      "description": "Filter Dashboard <<extend>> Melihat Dashboard"
+    },
+    {
+      "type": "include",
+      "from": "UC-24",
+      "to": "UC-24",
+      "description": "Mengelola Jadwal <<include>> Pengecekan Konflik Jadwal"
+    },
+    {
+      "type": "generalization",
+      "from": "ACT-04",
+      "to": "ACT-02",
+      "description": "Superadmin mewarisi semua hak akses Admin Reservasi"
+    },
+    {
+      "type": "generalization",
+      "from": "ACT-04",
+      "to": "ACT-03",
+      "description": "Superadmin mewarisi semua hak akses Admin Operasional"
+    }
+  ],
+
+  "booking_status_flow": {
+    "description": "Alur status booking dari awal hingga selesai",
+    "statuses": [
+      {
+        "status": "pending",
+        "description": "Booking baru dibuat, menunggu upload bukti DP",
+        "deadline": "2 jam setelah booking dibuat",
+        "auto_cancel": true
+      },
+      {
+        "status": "menunggu_verifikasi",
+        "description": "Bukti DP sudah diunggah, menunggu verifikasi admin",
+        "deadline": null,
+        "auto_cancel": false
+      },
+      {
+        "status": "uang_muka_dibayarkan",
+        "description": "DP diverifikasi dan diterima, menunggu pelunasan",
+        "deadline": "H-3 sebelum keberangkatan (atau +2 jam jika ≤ 3 hari)",
+        "auto_cancel": true,
+        "penalty": "Rp 50.000"
+      },
+      {
+        "status": "menunggu_pelunasan",
+        "description": "Bukti pelunasan sudah diunggah, menunggu verifikasi admin",
+        "deadline": null,
+        "auto_cancel": false
+      },
+      {
+        "status": "siap_berangkat",
+        "description": "Pembayaran lunas, siap berangkat",
+        "deadline": null,
+        "auto_cancel": false
+      },
+      {
+        "status": "sedang_berlangsung",
+        "description": "Perjalanan sedang berlangsung",
+        "deadline": null,
+        "auto_cancel": false
+      },
+      {
+        "status": "selesai",
+        "description": "Perjalanan selesai",
+        "deadline": null,
+        "auto_cancel": false
+      },
+      {
+        "status": "batal",
+        "description": "Booking dibatalkan (manual atau otomatis)",
+        "deadline": null,
+        "auto_cancel": false
+      }
+    ],
+    "flow_diagram": "pending → menunggu_verifikasi → uang_muka_dibayarkan → menunggu_pelunasan → siap_berangkat → sedang_berlangsung → selesai"
+  },
+
+  "access_control_matrix": {
+    "description": "Matriks hak akses fitur berdasarkan role",
+    "matrix": {
+      "Public (Tanpa Login)": {
+        "Halaman Beranda": true,
+        "Katalog Bus": true,
+        "Detail Bus": true,
+        "Cek Ketersediaan": true,
+        "Memberikan Review (via token)": true
+      },
+      "Customer (Google OAuth)": {
+        "Melakukan Pemesanan": true,
+        "Melihat Riwayat Booking": true,
+        "Melihat Detail Booking": true,
+        "Upload Bukti DP": true,
+        "Upload Bukti Pelunasan": true,
+        "Cetak Kwitansi": true
+      },
+      "Admin Reservasi": {
+        "Dashboard": true,
+        "Kelola Booking (CRUD)": true,
+        "Verifikasi Pembayaran": true,
+        "Kelola Customer (CRUD)": true,
+        "Laporan Pendapatan": true,
+        "Laporan Transaksi Customer": true,
+        "Export Excel (Pendapatan & Customer)": true
+      },
+      "Admin Operasional": {
+        "Dashboard": true,
+        "Kelola Bus (CRUD)": true,
+        "Kelola Driver (CRUD)": true,
+        "Kelola Jadwal (CRUD)": true,
+        "Laporan Utilisasi Bus": true,
+        "Laporan Aktivitas Driver": true,
+        "Export Excel (Bus & Driver)": true
+      },
+      "Superadmin": {
+        "Semua fitur Admin Reservasi": true,
+        "Semua fitur Admin Operasional": true,
+        "Manajemen Akun Admin (CRUD)": true,
+        "Reset Password Admin": true
+      }
+    }
+  },
+
+  "metadata": {
+    "total_use_cases": 37,
+    "total_actors": 5,
+    "categories": [
+      "Public",
+      "Authentication",
+      "Booking",
+      "Pembayaran",
+      "Review",
+      "Dashboard",
+      "Manajemen Reservasi",
+      "Manajemen Operasional",
+      "Laporan",
+      "Manajemen Pengguna",
+      "Sistem Otomatis"
+    ],
+    "framework": "CodeIgniter 3",
+    "database_tables": [
+      "admin",
+      "bus",
+      "booking",
+      "customer",
+      "driver",
+      "jadwal",
+      "reviews"
+    ],
+    "generated_at": "2026-06-03",
+    "generated_by": "Antigravity AI"
+  }
+}

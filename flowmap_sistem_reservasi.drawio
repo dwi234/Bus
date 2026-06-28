@@ -1,0 +1,149 @@
+<mxfile host="Electron" modified="2023-10-24T12:00:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="flow_map_1" name="Flowmap Sistem Reservasi Bus">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- Swimlanes -->
+        <mxCell id="pool1" value="Customer / Guest" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="360" height="1100" as="geometry" />
+        </mxCell>
+        <mxCell id="pool2" value="Admin / Reservasi" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="360" height="1100" as="geometry" />
+        </mxCell>
+        
+        <!-- Nodes Customer -->
+        <mxCell id="start" value="Start" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="120" y="30" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="catalog" value="Melihat Katalog Bus" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="110" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="check_avail" value="Cek Ketersediaan &amp; Pilih Tanggal" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="180" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="is_avail" value="Tersedia?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="110" y="250" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="login" value="Login (Google Auth)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="340" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="form" value="Isi Form Booking" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="410" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pending" value="Booking Pending (Batas 2 Jam)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="480" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="upload_dp" value="Upload Bukti DP" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="550" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="upload_lunas" value="Upload Bukti Pelunasan" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="730" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="cetak" value="Cetak Kwitansi / Tiket" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="90" y="930" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="end" value="End" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="pool1">
+          <mxGeometry x="120" y="1020" width="80" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Nodes Admin -->
+        <mxCell id="verif_dp" value="Verifikasi Bukti DP" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool2">
+          <mxGeometry x="90" y="550" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="is_dp_valid" value="Valid?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="pool2">
+          <mxGeometry x="110" y="620" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="status_dp" value="Status: Uang Muka Dibayar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="pool2">
+          <mxGeometry x="90" y="730" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="verif_lunas" value="Verifikasi Pelunasan" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="pool2">
+          <mxGeometry x="90" y="800" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="is_lunas_valid" value="Valid?" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="pool2">
+          <mxGeometry x="110" y="870" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="status_lunas" value="Status: Siap Berangkat" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="pool2">
+          <mxGeometry x="90" y="960" width="140" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Edges -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="start" target="catalog">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="catalog" target="check_avail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="check_avail" target="is_avail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="is_avail" target="catalog">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="320" y="320" />
+              <mxPoint x="320" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="is_avail" target="login">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="login" target="form">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="form" target="pending">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="pending" target="upload_dp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Crosspool Edges -->
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="upload_dp" target="verif_dp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="verif_dp" target="is_dp_valid">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" value="No (Tolak)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="is_dp_valid" target="upload_dp">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="690" />
+              <mxPoint x="430" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" value="Yes (Terima)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="is_dp_valid" target="status_dp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="status_dp" target="upload_lunas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="upload_lunas" target="verif_lunas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="verif_lunas" target="is_lunas_valid">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" value="No (Tolak)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="is_lunas_valid" target="upload_lunas">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="940" />
+              <mxPoint x="430" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" value="Yes (Terima)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="is_lunas_valid" target="status_lunas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="status_lunas" target="cetak">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="cetak" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

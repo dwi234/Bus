@@ -1,0 +1,393 @@
+<mxfile host="app.diagrams.net" modified="2026-06-03" agent="Antigravity AI" version="24.0.0" type="device">
+  <diagram id="usecase-diagram" name="Use Case Diagram - Sistem Reservasi Bus">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1600" pageHeight="2000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ============================================================ -->
+        <!-- SYSTEM BOUNDARY                                               -->
+        <!-- ============================================================ -->
+        <mxCell id="2" value="Sistem Informasi Reservasi Bus&#xa;Dheemobilindo Raja Utama (FleetStream PRO)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=2;verticalAlign=top;align=center;fillColor=none;dashed=1;dashPattern=8 4;strokeColor=#333333;fontSize=14;fontStyle=1;strokeWidth=2;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="160" y="10" width="880" height="1810" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ACTORS                                                        -->
+        <!-- ============================================================ -->
+        <mxCell id="10" value="Customer / Tamu" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=11;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="55" y="420" width="30" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" value="Admin Reservasi" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=11;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="1145" y="700" width="30" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" value="Admin Operasional" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=11;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="1145" y="1200" width="30" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" value="Superadmin" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=11;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="1145" y="1555" width="30" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" value="Sistem (Cron Job)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=11;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="55" y="1710" width="30" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- SECTION LABELS                                                -->
+        <!-- ============================================================ -->
+        <mxCell id="400" value="PUBLIK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#4472C4;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="45" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="401" value="AUTENTIKASI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#7030A0;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="205" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="402" value="BOOKING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#548235;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="430" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="403" value="PEMBAYARAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#BF8F00;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="595" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="404" value="REVIEW" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#C00000;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="755" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="405" value="DASHBOARD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6d0de;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#996185;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="845" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="406" value="MANAJEMEN RESERVASI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#4472C4;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="940" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="407" value="MANAJEMEN OPERASIONAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#548235;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1100" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="408" value="LAPORAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#BF8F00;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1260" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="409" value="MANAJEMEN PENGGUNA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#C00000;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1550" width="840" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="410" value="SISTEM OTOMATIS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=none;fontSize=9;fontStyle=1;fontColor=#666666;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="180" y="1650" width="840" height="18" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - PUBLIK                                            -->
+        <!-- ============================================================ -->
+        <mxCell id="101" value="Melihat Beranda" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="220" y="70" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="102" value="Melihat Katalog Bus" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="600" y="70" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="103" value="Melihat Detail Bus" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="220" y="135" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="104" value="Cek Ketersediaan Bus" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="600" y="135" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - AUTENTIKASI                                       -->
+        <!-- ============================================================ -->
+        <mxCell id="105" value="Login Customer (Google OAuth)" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="220" y="230" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="106" value="Logout Customer" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="600" y="230" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="115" value="Login Admin" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="220" y="295" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="116" value="Logout Admin" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="600" y="295" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="117" value="Recovery Password Admin" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="410" y="360" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - BOOKING                                           -->
+        <!-- ============================================================ -->
+        <mxCell id="107" value="Melakukan Pemesanan Bus" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="220" y="455" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="108" value="Melihat Voucher Booking" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="600" y="455" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="109" value="Melihat Riwayat Booking" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="220" y="520" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="110" value="Melihat Detail Booking" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="600" y="520" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - PEMBAYARAN                                        -->
+        <!-- ============================================================ -->
+        <mxCell id="111" value="Upload Bukti Pembayaran DP" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="220" y="620" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="112" value="Upload Bukti Pelunasan" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="600" y="620" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="113" value="Cetak Kwitansi" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="410" y="685" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - REVIEW                                            -->
+        <!-- ============================================================ -->
+        <mxCell id="114" value="Memberikan Review" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="410" y="780" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - DASHBOARD                                         -->
+        <!-- ============================================================ -->
+        <mxCell id="118" value="Melihat Dashboard" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#e6d0de;strokeColor=#996185;" vertex="1" parent="1">
+          <mxGeometry x="410" y="870" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - MANAJEMEN RESERVASI                               -->
+        <!-- ============================================================ -->
+        <mxCell id="119" value="Kelola Data Booking (CRUD)" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="220" y="965" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="120" value="Verifikasi Pembayaran" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="600" y="965" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="121" value="Kelola Data Customer (CRUD)" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="410" y="1030" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - MANAJEMEN OPERASIONAL                             -->
+        <!-- ============================================================ -->
+        <mxCell id="122" value="Kelola Data Bus (CRUD)" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1125" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="123" value="Kelola Data Driver (CRUD)" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1125" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="124" value="Kelola Jadwal (CRUD)" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="410" y="1190" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - LAPORAN                                           -->
+        <!-- ============================================================ -->
+        <mxCell id="125" value="Laporan Pendapatan" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1285" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="126" value="Export Laporan Pendapatan" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1285" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="127" value="Laporan Transaksi Customer" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1350" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="128" value="Export Laporan Customer" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1350" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="129" value="Laporan Utilisasi Bus" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1415" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="130" value="Export Laporan Utilisasi Bus" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1415" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="131" value="Laporan Aktivitas Driver" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1480" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="132" value="Export Laporan Driver" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1480" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - MANAJEMEN PENGGUNA                                -->
+        <!-- ============================================================ -->
+        <mxCell id="133" value="Kelola Akun Admin (CRUD)" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1575" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="134" value="Reset Password Admin" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1575" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- USE CASES - SISTEM OTOMATIS                                   -->
+        <!-- ============================================================ -->
+        <mxCell id="135" value="Auto-Cancel Booking Expired" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="220" y="1675" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="136" value="Kirim Review Request Otomatis" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1675" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="137" value="Kirim Reminder Pelunasan" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="410" y="1740" width="220" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ASSOCIATIONS: Customer -> Use Cases                           -->
+        <!-- ============================================================ -->
+        <mxCell id="200" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="101" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="201" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="102" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="202" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="103" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="203" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="105" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="204" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="106" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="205" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="107" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="206" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="108" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="207" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="109" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="208" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="110" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="209" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="111" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="210" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="112" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="211" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="113" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="212" style="endArrow=none;html=1;strokeColor=#999999;" edge="1" source="10" target="114" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ASSOCIATIONS: Admin Reservasi -> Use Cases                    -->
+        <!-- ============================================================ -->
+        <mxCell id="220" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="115" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="221" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="116" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="222" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="117" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="223" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="118" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="224" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="119" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="225" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="120" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="226" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="121" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="227" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="125" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="228" style="endArrow=none;html=1;strokeColor=#4472C4;" edge="1" source="11" target="127" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ASSOCIATIONS: Admin Operasional -> Use Cases                  -->
+        <!-- ============================================================ -->
+        <mxCell id="240" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="115" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="241" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="116" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="242" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="117" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="243" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="118" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="244" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="122" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="245" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="123" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="246" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="124" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="247" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="129" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="248" style="endArrow=none;html=1;strokeColor=#548235;" edge="1" source="12" target="131" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ASSOCIATIONS: Superadmin -> Use Cases (unique only)           -->
+        <!-- ============================================================ -->
+        <mxCell id="260" style="endArrow=none;html=1;strokeColor=#C00000;" edge="1" source="13" target="133" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="261" style="endArrow=none;html=1;strokeColor=#C00000;" edge="1" source="13" target="134" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- ASSOCIATIONS: Sistem (Cron) -> Use Cases                      -->
+        <!-- ============================================================ -->
+        <mxCell id="270" style="endArrow=none;html=1;strokeColor=#666666;" edge="1" source="14" target="135" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="271" style="endArrow=none;html=1;strokeColor=#666666;" edge="1" source="14" target="136" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="272" style="endArrow=none;html=1;strokeColor=#666666;" edge="1" source="14" target="137" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- GENERALIZATION: Superadmin inherits Admin roles               -->
+        <!-- ============================================================ -->
+        <mxCell id="280" value="" style="endArrow=block;endFill=0;endSize=16;html=1;strokeColor=#009900;strokeWidth=2;" edge="1" source="13" target="11" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="281" value="" style="endArrow=block;endFill=0;endSize=16;html=1;strokeColor=#009900;strokeWidth=2;" edge="1" source="13" target="12" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- INCLUDE RELATIONSHIPS                                         -->
+        <!-- ============================================================ -->
+        <mxCell id="290" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;dashed=1;dashPattern=8 4;endArrow=open;endSize=12;strokeColor=#0066CC;fontColor=#0066CC;fontSize=9;strokeWidth=1.5;" edge="1" source="107" target="104" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="291" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;dashed=1;dashPattern=8 4;endArrow=open;endSize=12;strokeColor=#0066CC;fontColor=#0066CC;fontSize=9;strokeWidth=1.5;" edge="1" source="107" target="105" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- EXTEND RELATIONSHIPS                                          -->
+        <!-- ============================================================ -->
+        <mxCell id="295" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;dashed=1;dashPattern=8 4;endArrow=open;endSize=12;strokeColor=#CC6600;fontColor=#CC6600;fontSize=9;strokeWidth=1.5;" edge="1" source="126" target="125" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="296" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;dashed=1;dashPattern=8 4;endArrow=open;endSize=12;strokeColor=#CC6600;fontColor=#CC6600;fontSize=9;strokeWidth=1.5;" edge="1" source="128" target="127" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="297" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;dashed=1;dashPattern=8 4;endArrow=open;endSize=12;strokeColor=#CC6600;fontColor=#CC6600;fontSize=9;strokeWidth=1.5;" edge="1" source="130" target="129" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="298" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;dashed=1;dashPattern=8 4;endArrow=open;endSize=12;strokeColor=#CC6600;fontColor=#CC6600;fontSize=9;strokeWidth=1.5;" edge="1" source="132" target="131" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
