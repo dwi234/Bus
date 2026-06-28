@@ -94,6 +94,7 @@ foreach($driver as $dr) {
                 </button>
             </div>
             <form action="<?= base_url('jadwal/tambah') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Booking ID</label>
@@ -155,6 +156,7 @@ foreach($driver as $dr) {
                 </button>
             </div>
             <form action="<?= base_url('jadwal/edit') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <input type="hidden" name="jadwal_id" value="<?= $j['jadwal_id']; ?>">
                 <div class="form-group">

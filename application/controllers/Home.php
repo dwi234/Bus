@@ -11,7 +11,7 @@ class Home extends CI_Controller {
         $this->load->model('Customer_model');
         $this->load->model('Notification_model');
         $this->load->library('session');
-        $this->Booking_model->auto_check_deadlines();
+        // NOTE: auto_check_deadlines() moved to Cron controller only
     }
 
     /**
@@ -292,6 +292,7 @@ class Home extends CI_Controller {
 
     /**
      * Google Callback Handler
+     * Uses proper JWT signature verification via openssl_verify()
      */
     public function google_callback()
     {
@@ -302,24 +303,24 @@ class Home extends CI_Controller {
         }
 
         $credential = $this->input->post('credential');
-        $parts = explode('.', $credential);
-        
-        if (count($parts) < 3) {
-            $this->session->set_flashdata('error', 'Token tidak valid.');
+
+        // Verify Google ID token with cryptographic signature verification
+        $payload = $this->_verify_google_id_token($credential);
+
+        if (!$payload) {
+            $this->session->set_flashdata('error', 'Token Google tidak valid atau sudah kadaluarsa.');
             redirect('home/guest_login');
             return;
         }
 
-        $payload = json_decode(base64_decode($parts[1]), true);
-        
-        if (!$payload || !isset($payload['email'])) {
-            $this->session->set_flashdata('error', 'Gagal membaca data dari Google.');
+        $email = filter_var($payload['email'], FILTER_VALIDATE_EMAIL);
+        $name = isset($payload['name']) ? htmlspecialchars($payload['name'], ENT_QUOTES, 'UTF-8') : 'Google User';
+
+        if (!$email) {
+            $this->session->set_flashdata('error', 'Email tidak valid dari Google.');
             redirect('home/guest_login');
             return;
         }
-
-        $email = $payload['email'];
-        $name = $payload['name'] ?? 'Google User';
 
         // Check if customer exists
         $customer = $this->db->where('email', $email)->get('customer')->row_array();
@@ -356,6 +357,211 @@ class Home extends CI_Controller {
     {
         $this->session->unset_userdata(['guest_email', 'guest_id', 'guest_name']);
         redirect('home');
+    }
+
+    // ========================================================================
+    // Google OAuth 2.0 ID Token Verification (no Composer required)
+    // ========================================================================
+
+    /**
+     * Verify a Google ID token using RSA signature verification.
+     * Fetches Google's public keys, verifies the JWT signature, and validates claims.
+     *
+     * @param string $id_token  The raw JWT string from Google Sign-In
+     * @return array|false      Decoded payload on success, FALSE on failure
+     */
+    private function _verify_google_id_token($id_token)
+    {
+        $parts = explode('.', $id_token);
+        if (count($parts) !== 3) {
+            return false;
+        }
+
+        list($header64, $payload64, $signature64) = $parts;
+
+        // Decode the JWT header to get the key ID (kid)
+        $header = json_decode($this->_base64url_decode($header64), true);
+        if (!$header || !isset($header['kid'])) {
+            return false;
+        }
+
+        // Fetch Google's current public keys
+        $google_keys = $this->_get_google_public_keys();
+        if (!$google_keys || !isset($google_keys[$header['kid']])) {
+            return false;
+        }
+
+        // Verify the RSA-SHA256 signature
+        $signing_input = $header64 . '.' . $payload64;
+        $signature = $this->_base64url_decode($signature64);
+        $pem_key = $google_keys[$header['kid']];
+
+        $pub_key = openssl_pkey_get_public($pem_key);
+        if (!$pub_key) {
+            return false;
+        }
+
+        $valid = (openssl_verify($signing_input, $signature, $pub_key, OPENSSL_ALGO_SHA256) === 1);
+        openssl_pkey_free($pub_key);
+
+        if (!$valid) {
+            return false;
+        }
+
+        // Decode and validate claims
+        $payload = json_decode($this->_base64url_decode($payload64), true);
+        if (!$payload) {
+            return false;
+        }
+
+        // Validate issuer
+        $valid_issuers = ['accounts.google.com', 'https://accounts.google.com'];
+        if (!in_array($payload['iss'] ?? '', $valid_issuers)) {
+            return false;
+        }
+
+        // Validate expiration
+        if (isset($payload['exp']) && $payload['exp'] < time()) {
+            return false;
+        }
+
+        // Validate audience (client ID) if configured
+        $client_id = $this->config->item('google_client_id');
+        if (!empty($client_id) && isset($payload['aud']) && $payload['aud'] !== $client_id) {
+            return false;
+        }
+
+        // Validate email is present and verified
+        if (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        if (isset($payload['email_verified']) && $payload['email_verified'] !== true) {
+            return false;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * Fetch Google's public signing keys for ID token verification.
+     * Results are cached to a file for 1 hour to avoid repeated HTTP requests.
+     *
+     * @return array|false  Associative array [kid => PEM] or FALSE on failure
+     */
+    private function _get_google_public_keys()
+    {
+        $cache_file = APPPATH . 'cache/google_oauth_keys.json';
+        $cache_ttl = 3600; // 1 hour
+
+        // Return cached keys if still valid
+        if (file_exists($cache_file) && (time() - filemtime($cache_file)) < $cache_ttl) {
+            $cached = @json_decode(file_get_contents($cache_file), true);
+            if (is_array($cached) && !empty($cached)) {
+                return $cached;
+            }
+        }
+
+        // Fetch current keys from Google
+        $ctx = stream_context_create([
+            'http' => [
+                'timeout' => 5,
+                'method'  => 'GET',
+                'header'  => "User-Agent: Dheemobilindo/1.0\r\n"
+            ]
+        ]);
+
+        $response = @file_get_contents('https://www.googleapis.com/oauth2/v3/certs', false, $ctx);
+        if (!$response) {
+            return false;
+        }
+
+        $data = json_decode($response, true);
+        if (!isset($data['keys']) || !is_array($data['keys'])) {
+            return false;
+        }
+
+        $keys = [];
+        foreach ($data['keys'] as $jwk) {
+            if (isset($jwk['kid'], $jwk['n'], $jwk['e'], $jwk['kty']) && $jwk['kty'] === 'RSA') {
+                $pem = $this->_jwk_to_pem($jwk);
+                if ($pem) {
+                    $keys[$jwk['kid']] = $pem;
+                }
+            }
+        }
+
+        if (!empty($keys)) {
+            @file_put_contents($cache_file, json_encode($keys));
+        }
+
+        return !empty($keys) ? $keys : false;
+    }
+
+    /**
+     * Convert a JWK (JSON Web Key) RSA public key to PEM format.
+     *
+     * @param array $jwk  JWK with 'n' (modulus) and 'e' (exponent) values
+     * @return string|false  PEM-encoded public key or FALSE on failure
+     */
+    private function _jwk_to_pem($jwk)
+    {
+        $modulus = $this->_base64url_decode($jwk['n']);
+        $exponent = $this->_base64url_decode($jwk['e']);
+
+        if ($modulus === false || $exponent === false) {
+            return false;
+        }
+
+        // Prepend 0x00 to ensure positive integer encoding (high bit set)
+        if (ord($modulus[0]) & 0x80) {
+            $modulus = "\x00" . $modulus;
+        }
+        if (ord($exponent[0]) & 0x80) {
+            $exponent = "\x00" . $exponent;
+        }
+
+        // Build DER-encoded SubjectPublicKeyInfo structure
+        $modulus_tlv  = "\x02" . $this->_der_length(strlen($modulus)) . $modulus;
+        $exponent_tlv = "\x02" . $this->_der_length(strlen($exponent)) . $exponent;
+        $public_key   = "\x03" . $this->_der_length(strlen($modulus_tlv) . strlen($exponent_tlv)) . "\x00" . $modulus_tlv . $exponent_tlv;
+
+        // Algorithm identifier: rsaEncryption (OID 1.2.840.113549.1.1.1) with NULL
+        $alg_id = "\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00";
+
+        $spki = "\x30" . $this->_der_length(strlen($alg_id) . strlen($public_key)) . $alg_id . $public_key;
+
+        return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode($spki), 64, "\n") . "-----END PUBLIC KEY-----\n";
+    }
+
+    /**
+     * Base64url decode (RFC 7515).
+     */
+    private function _base64url_decode($data)
+    {
+        $remainder = strlen($data) % 4;
+        if ($remainder) {
+            $data .= str_repeat('=', 4 - $remainder);
+        }
+        return base64_decode(strtr($data, '-_', '+/'));
+    }
+
+    /**
+     * Encode a length value in DER (ASN.1) format.
+     *
+     * @param int $length
+     * @return string|false
+     */
+    private function _der_length($length)
+    {
+        if ($length < 0x80) {
+            return chr($length);
+        } elseif ($length < 0x100) {
+            return "\x81" . chr($length);
+        } elseif ($length < 0x10000) {
+            return "\x82" . chr($length >> 8) . chr($length & 0xFF);
+        }
+        return false;
     }
 
     /**
@@ -428,18 +634,20 @@ class Home extends CI_Controller {
      */
     public function upload_bukti()
     {
-        $booking_id = $this->input->post('booking_id');
+        $booking_id = (int) $this->input->post('booking_id');
         
-        // Pastikan user punya akses (login atau dari voucher)
         $is_guest_logged_in = $this->session->userdata('guest_email');
-        $is_from_voucher = ($this->session->userdata('guest_booking') && $this->session->userdata('guest_booking')['booking_id'] == $booking_id);
+        $guest_id = $this->session->userdata('guest_id');
 
-        if (!$is_guest_logged_in && !$is_from_voucher) {
+        if (!$is_guest_logged_in || !$booking_id) {
             redirect('home');
             return;
         }
 
-        if (!$booking_id) {
+        // Verify booking belongs to this customer
+        $booking = $this->db->where('booking_id', $booking_id)->get('booking')->row_array();
+        if (!$booking || $booking['customer_id'] != $guest_id) {
+            $this->session->set_flashdata('error', 'Anda tidak memiliki akses ke booking ini.');
             redirect('home');
             return;
         }
@@ -479,19 +687,24 @@ class Home extends CI_Controller {
             $this->session->set_flashdata('error', $this->upload->display_errors('', ''));
         }
 
-        if ($is_from_voucher) {
-            redirect('home/voucher');
-        } else {
-            redirect('home/booking_detail/' . $booking_id);
-        }
+        redirect('home/booking_detail/' . $booking_id);
     }
 
     public function upload_pelunasan()
     {
-        $booking_id = $this->input->post('booking_id');
+        $booking_id = (int) $this->input->post('booking_id');
         
         $is_guest_logged_in = $this->session->userdata('guest_email');
-        if (!$is_guest_logged_in) {
+        $guest_id = $this->session->userdata('guest_id');
+        if (!$is_guest_logged_in || !$booking_id) {
+            redirect('home');
+            return;
+        }
+
+        // Verify booking belongs to this customer
+        $booking = $this->db->where('booking_id', $booking_id)->get('booking')->row_array();
+        if (!$booking || $booking['customer_id'] != $guest_id) {
+            $this->session->set_flashdata('error', 'Anda tidak memiliki akses ke booking ini.');
             redirect('home');
             return;
         }

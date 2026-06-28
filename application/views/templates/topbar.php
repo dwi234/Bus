@@ -85,10 +85,12 @@
 
                         <script>
                         function markNotifRead(id) {
+                            var csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+                            var csrfHash = '<?= $this->security->get_csrf_hash() ?>';
                             fetch('<?= base_url("notification/mark_read") ?>', {
                                 method: 'POST',
                                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                                body: 'notification_id=' + id,
+                                body: 'notification_id=' + id + '&' + csrfName + '=' + csrfHash,
                                 keepalive: true
                             });
                         }
@@ -98,8 +100,12 @@
                                 btn.addEventListener('click', function(e) {
                                     e.preventDefault();
                                     e.stopPropagation();
+                                    var csrfName2 = '<?= $this->security->get_csrf_token_name() ?>';
+                                    var csrfHash2 = '<?= $this->security->get_csrf_hash() ?>';
                                     fetch('<?= base_url("notification/mark_all_read") ?>', {
-                                        method: 'POST'
+                                        method: 'POST',
+                                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                                        body: csrfName2 + '=' + csrfHash2
                                     }).then(function() {
                                         // Hapus badge counter
                                         var badge = document.querySelector('.badge-counter');
@@ -124,13 +130,13 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-                                    <?= $this->session->userdata('role') == 'operasional' ? 'Rafli' : ($this->session->userdata('nama_lengkap') ? $this->session->userdata('nama_lengkap') : $this->session->userdata('username')) ?>
+                                    <?= $this->session->userdata('nama_lengkap') ? $this->session->userdata('nama_lengkap') : $this->session->userdata('username') ?>
                                     <span class="badge badge-<?= $this->session->userdata('role') == 'operasional' ? 'warning' : 'info' ?> ml-1"><?= ucfirst($this->session->userdata('role')) ?></span>
                                 </span>
                                 <img class="img-profile rounded-circle" src="<?= base_url('assets/') ?>img/undraw_profile.svg">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="<?= base_url('login') ?>" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="<?= base_url('auth/login') ?>" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Keluar
                                 </a>
                             </div>

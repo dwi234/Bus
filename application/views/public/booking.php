@@ -34,6 +34,7 @@
 
                 <div class="col-xl-11 col-lg-12 col-12 mx-auto">
                 <form action="<?= base_url('home/booking') ?>" method="POST" id="bookingForm" role="form">
+                    <?= csrf_field() ?>
                     <div class="row">
                         <!-- Kolom Kiri: Informasi Perjalanan & Pilih Armada -->
                         <div class="col-lg-6 col-12 d-flex flex-column">

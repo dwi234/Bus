@@ -294,6 +294,7 @@
                         <?php endif; ?>
 
                         <form action="<?= base_url('home/upload_bukti') ?>" method="post" enctype="multipart/form-data" style="margin-top: 16px;">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="booking_id" value="<?= $booking['booking_id'] ?>">
                             <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: #344054;">Upload Bukti Transfer (JPG/PNG)</label>
                             <input type="file" name="bukti_pembayaran" accept="image/*" required style="width: 100%; padding: 12px; border: 1px dashed #1a3bb5; border-radius: 10px; background: #f0f4ff; margin-bottom: 12px; font-size: 0.85rem;">

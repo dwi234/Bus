@@ -11,9 +11,6 @@ class Booking extends CI_Controller {
         $this->load->model('Bus_model');
         $this->load->model('Customer_model');
         $this->load->model('Notification_model');
-        
-        // Auto check deadlines
-        $this->Booking_model->auto_check_deadlines();
 
         // Cek apakah user sudah login
         if (!$this->session->userdata('status') || $this->session->userdata('status') != 'login') {

@@ -69,6 +69,7 @@
                 </button>
             </div>
             <form action="<?= base_url('bus/tambah') ?>" method="POST" enctype="multipart/form-data">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Nama Bus</label>
@@ -146,6 +147,7 @@
                 </button>
             </div>
             <form action="<?= base_url('bus/edit') ?>" method="POST" enctype="multipart/form-data">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <input type="hidden" name="bus_id" value="<?= $b['bus_id']; ?>">
                 <div class="form-group">

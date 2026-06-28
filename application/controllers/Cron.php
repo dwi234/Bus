@@ -6,12 +6,18 @@ class Cron extends CI_Controller {
     public function __construct()
     {
         parent::__construct();
-        // Hanya bisa diakses lewat CLI atau token rahasia untuk keamanan
-        // Tapi untuk keperluan demo ini, kita biarkan terbuka
+        // Restrict to CLI access only
+        if (php_sapi_name() !== 'cli') {
+            show_error('This endpoint is only accessible via CLI.', 403, 'Access Denied');
+        }
     }
 
     public function send_review_requests()
     {
+        // Run deadline checks first
+        $this->load->model('Booking_model');
+        $this->Booking_model->auto_check_deadlines();
+
         // Cari booking dengan status selesai, tanggal_pulang = H-1 (atau lebih lama), dan belum direquest
         $this->db->select('booking.*, customer.nama as customer_name, customer.email, customer.tlp, bus.bus_nama');
         $this->db->from('booking');
@@ -31,7 +37,7 @@ class Cron extends CI_Controller {
         $count = 0;
         foreach ($bookings as $b) {
             // Generate token (md5 hash dari booking_id + time + salt)
-            $token = md5($b['booking_id'] . time() . 'bus_secret_salt');
+            $token = bin2hex(random_bytes(32));
 
             // Simpan token ke database
             $this->db->where('booking_id', $b['booking_id']);

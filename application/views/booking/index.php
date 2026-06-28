@@ -81,6 +81,7 @@
                 </button>
             </div>
             <form action="<?= base_url('booking/tambah') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Customer</label>
@@ -155,6 +156,7 @@
                 </button>
             </div>
             <form action="<?= base_url('booking/edit') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <input type="hidden" name="booking_id" value="<?= $b['booking_id']; ?>">
                 <div class="form-group">
@@ -243,6 +245,7 @@
                 
                 <?php if($b['booking_status'] == 'menunggu_verifikasi' || $b['booking_status'] == 'menunggu_pelunasan'): ?>
                 <form action="<?= base_url('booking/verifikasi_pembayaran') ?>" method="POST">
+                    <?= csrf_field() ?>
                     <input type="hidden" name="booking_id" value="<?= $b['booking_id'] ?>">
                     <div class="form-group text-left">
                         <label class="font-weight-bold text-danger">Alasan Penolakan (Opsional, hanya jika ditolak):</label>

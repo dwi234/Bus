@@ -63,6 +63,7 @@
                 </button>
             </div>
             <form action="<?= base_url('customer/tambah') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Nama Lengkap</label>
@@ -102,6 +103,7 @@
                 </button>
             </div>
             <form action="<?= base_url('customer/edit') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <input type="hidden" name="customer_id" value="<?= $c['customer_id']; ?>">
                 <div class="form-group">

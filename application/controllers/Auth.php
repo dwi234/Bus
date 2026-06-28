@@ -26,6 +26,8 @@ class Auth extends CI_Controller {
 
             // CEK PASSWORD
             if (password_verify($password, $admin['password'])) {
+                // Regenerate session ID to prevent session fixation
+                $this->session->sess_regenerate(TRUE);
 
                 $data = [
                     'admin_id' => $admin['admin_id'],
@@ -74,9 +76,14 @@ class Auth extends CI_Controller {
         }
     }
 
-    // AJAX: Reset password
+    // AJAX: Reset password — requires authenticated superadmin session
     public function reset_password()
     {
+        if (!$this->session->userdata('status') || $this->session->userdata('status') != 'login') {
+            echo json_encode(['status' => 'error', 'message' => 'Akses ditolak. Silakan login terlebih dahulu.']);
+            return;
+        }
+
         $username = $this->input->post('username');
         $new_password = $this->input->post('new_password');
 
@@ -85,8 +92,8 @@ class Auth extends CI_Controller {
             return;
         }
 
-        if (strlen($new_password) < 4) {
-            echo json_encode(['status' => 'error', 'message' => 'Password minimal 4 karakter!']);
+        if (strlen($new_password) < 8) {
+            echo json_encode(['status' => 'error', 'message' => 'Password minimal 8 karakter!']);
             return;
         }
 

@@ -694,6 +694,7 @@
                 <?php endif; ?>
 
                 <form method="post" action="<?= base_url('auth/proses_login'); ?>">
+                    <?= csrf_field() ?>
 
                     <!-- Username -->
                     <div class="form-group animate-in delay-3">

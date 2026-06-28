@@ -6,13 +6,13 @@
     <!-- Flash Messages -->
     <?php if($this->session->flashdata('success')): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle mr-1"></i> <?= $this->session->flashdata('success') ?>
+        <i class="fas fa-check-circle mr-1"></i> <?= $this->security->xss_clean($this->session->flashdata('success')) ?>
         <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
     </div>
     <?php endif; ?>
     <?php if($this->session->flashdata('error')): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle mr-1"></i> <?= $this->session->flashdata('error') ?>
+        <i class="fas fa-exclamation-triangle mr-1"></i> <?= $this->security->xss_clean($this->session->flashdata('error')) ?>
         <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
     </div>
     <?php endif; ?>
@@ -137,6 +137,7 @@
                 <button class="close text-white" type="button" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <form action="<?= base_url('usermanagement/tambah') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Nama Lengkap <span class="text-danger">*</span></label>
@@ -180,6 +181,7 @@
                 <button class="close" type="button" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <form action="<?= base_url('usermanagement/edit') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <input type="hidden" name="admin_id" value="<?= $a['admin_id']; ?>">
                 <div class="form-group">

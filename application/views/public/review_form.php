@@ -86,6 +86,7 @@
         Bagaimana pengalaman Anda dengan bus dan layanan sopir kami? Masukan Anda sangat berarti.</p>
 
         <form action="<?= base_url('review/submit') ?>" method="POST">
+            <?= csrf_field() ?>
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
             
             <div class="star-rating">

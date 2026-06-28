@@ -67,6 +67,7 @@
                 </button>
             </div>
             <form action="<?= base_url('driver/tambah') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <div class="form-group">
                     <label>Nama Driver</label>
@@ -118,6 +119,7 @@
                 </button>
             </div>
             <form action="<?= base_url('driver/edit') ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="modal-body">
                 <input type="hidden" name="driver_id" value="<?= $d['driver_id']; ?>">
                 <div class="form-group">

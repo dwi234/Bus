@@ -6,13 +6,13 @@
 
     <?php if($this->session->flashdata('success')): ?>
         <div class="alert alert-success alert-dismissible fade show">
-            <?= $this->session->flashdata('success') ?>
+            <?= $this->security->xss_clean($this->session->flashdata('success')) ?>
             <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
         </div>
     <?php endif; ?>
     <?php if($this->session->flashdata('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show">
-            <?= $this->session->flashdata('error') ?>
+            <?= $this->security->xss_clean($this->session->flashdata('error')) ?>
             <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
         </div>
     <?php endif; ?>
@@ -86,6 +86,7 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <form action="<?= base_url('booking/verifikasi_pembayaran') ?>" method="post">
+                                <?= csrf_field() ?>
                                 <input type="hidden" name="booking_id" value="<?= $v['booking_id'] ?>">
                                 <input type="hidden" name="action" value="tolak">
                                 <div class="modal-header">

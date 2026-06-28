@@ -94,6 +94,7 @@
         <div class="d-flex align-items-center">
             <!-- Filter Period -->
             <form action="<?= base_url('dashboard') ?>" method="GET" class="form-inline mr-3">
+            <?= csrf_field() ?>
                 <select name="filter_month" class="form-control form-control-sm mr-2 rounded-pill shadow-sm border-0 bg-white" onchange="this.form.submit()">
                     <?php 
                     $months = ['01'=>'Jan', '02'=>'Feb', '03'=>'Mar', '04'=>'Apr', '05'=>'Mei', '06'=>'Jun', '07'=>'Jul', '08'=>'Agu', '09'=>'Sep', '10'=>'Okt', '11'=>'Nov', '12'=>'Des'];
@@ -123,7 +124,7 @@
     <!-- Flash message -->
     <?php if($this->session->flashdata('error')): ?>
     <div class="alert alert-danger alert-dismissible fade show border-left-danger shadow-sm" role="alert">
-        <i class="fas fa-exclamation-triangle mr-1"></i> <?= $this->session->flashdata('error') ?>
+        <i class="fas fa-exclamation-triangle mr-1"></i> <?= $this->security->xss_clean($this->session->flashdata('error')) ?>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
