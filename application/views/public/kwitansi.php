@@ -89,6 +89,8 @@
             transition: 0.2s; box-shadow: 0 4px 12px rgba(26,59,181,0.2);
         }
         .btn-print:hover { background: #1530a0; transform: translateY(-1px); }
+        .btn-thermal { background: #10b981; box-shadow: 0 4px 12px rgba(16,185,129,0.2); margin-left: 10px; }
+        .btn-thermal:hover { background: #059669; }
 
         @media print { 
             body { background: white; padding: 0; }
@@ -101,6 +103,7 @@
 <body>
     <div class="print-wrapper" style="text-align: right; margin-bottom: 24px; max-width: 800px; margin-left: auto; margin-right: auto;">
         <button class="btn-print" onclick="window.print()">Cetak PDF / Print</button>
+        <button class="btn-print btn-thermal" onclick="cetakThermal(<?= $booking['booking_id'] ?>)">Cetak Struk Kasir (Thermal)</button>
     </div>
     
     <div class="invoice-box">
@@ -223,5 +226,37 @@
             </div>
         </div>
     </div>
+
+    <script>
+    function cetakThermal(bookingId) {
+        const btn = document.querySelector('.btn-thermal');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Menghubungkan Printer...';
+        
+        fetch('<?= base_url("home/cetak_thermal/") ?>' + bookingId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let info = 'Berhasil! Data cetak terkirim.\n';
+                    info += 'Method: ' + (data.method || '?') + '\n';
+                    info += 'Hostname: ' + (data.hostname || '?') + '\n';
+                    info += 'Device: ' + (data.device_path || '?') + '\n\n';
+                    info += 'Jika printer tidak merespon, cek koneksi dan status printer di Windows.';
+                    alert(info);
+                } else {
+                    alert('Gagal mencetak: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan jaringan atau server saat mencoba mencetak.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
+    </script>
 </body>
 </html>

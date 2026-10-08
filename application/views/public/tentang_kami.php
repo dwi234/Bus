@@ -10,7 +10,7 @@
 
         <div class="row align-items-center mb-5 pb-5">
             <div class="col-lg-6 col-12 mb-5 mb-lg-0">
-                <img src="<?= base_url('assets/img/bus_hero.png') ?>" class="img-fluid d-block" alt="Armada Dheemobilindo" style="width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 16px; box-shadow: 0 12px 35px rgba(0,0,0,0.15);">
+                <img src="<?= base_url('assets/img/bus/3473fb8ea2fe44e83aec89a65399e184.jpeg') ?>" class="img-fluid d-block" alt="Armada Dheemobilindo" style="width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 16px; box-shadow: 0 12px 35px rgba(0,0,0,0.15);">
             </div>
 
             <div class="col-lg-5 col-12 offset-lg-1 d-flex flex-column justify-content-center">

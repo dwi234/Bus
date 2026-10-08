@@ -138,7 +138,7 @@ $config['subclass_prefix'] = 'MY_';
 | Note: This will NOT disable or override the CodeIgniter-specific
 |	autoloading (application/config/autoload.php)
 */
-$config['composer_autoload'] = FALSE;
+$config['composer_autoload'] = APPPATH . 'config/autoloader.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -465,7 +465,8 @@ $config['csrf_regenerate'] = FALSE;
 $config['csrf_exclude_uris'] = array(
     'notification/mark_read',
     'notification/mark_all_read',
-    'home/check_availability'
+    'home/check_availability',
+    'home/google_callback'
 );
 
 /*

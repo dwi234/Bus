@@ -127,6 +127,7 @@
             background: #fff; font-family: 'Inter', sans-serif;
         }
         .btn-secondary-v:hover { border-color: #1a3bb5; color: #1a3bb5; }
+        .btn-thermal-v:hover { background: #059669 !important; border-color: #059669 !important; color: white !important; }
 
         /* Countdown */
         .countdown-bar {
@@ -148,6 +149,13 @@
             .info-grid { grid-template-columns: 1fr; }
             .voucher-top, .voucher-body { padding: 20px; }
             .success-header h1 { font-size: 1.4rem; }
+        }
+
+        @media print {
+            body { background: white !important; padding: 0 !important; }
+            .success-header, .back-link, .btn-wa, .btn-secondary-v, .btn-thermal-v, form, .unique-code-info, .bank-info { display: none !important; }
+            .voucher-card { box-shadow: none !important; border: none !important; }
+            .voucher-top { background: #1a3bb5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -331,6 +339,9 @@
                     <button onclick="window.print()" class="btn-secondary-v" style="margin-top: 12px;">
                         <i class="fas fa-print"></i> Cetak / Simpan Voucher
                     </button>
+                    <button onclick="cetakThermal(<?= $booking['booking_id'] ?>)" class="btn-secondary-v btn-thermal-v" style="margin-top: 12px; background: #10b981; color: white; border-color: #10b981;">
+                        <i class="fas fa-receipt"></i> Cetak Struk Kasir (Thermal)
+                    </button>
                 </div>
             </div>
         </div>
@@ -359,6 +370,37 @@
             }
         }, 1000);
         <?php endif; ?>
+    </script>
+    <script>
+    function cetakThermal(bookingId) {
+        const btn = document.querySelector('.btn-thermal-v');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghubungkan...';
+        
+        fetch('<?= base_url("home/cetak_thermal/") ?>' + bookingId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let info = 'Berhasil! Data cetak terkirim.\n';
+                    info += 'Method: ' + (data.method || '?') + '\n';
+                    info += 'Hostname: ' + (data.hostname || '?') + '\n';
+                    info += 'Device: ' + (data.device_path || '?') + '\n\n';
+                    info += 'Jika printer tidak merespon, cek koneksi dan status printer di Windows.';
+                    alert(info);
+                } else {
+                    alert('Gagal mencetak: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan jaringan atau server saat mencoba mencetak.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
     </script>
 </body>
 </html>

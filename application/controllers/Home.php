@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Home extends CI_Controller {
 
+    private $_token_error = '';
+
     public function __construct()
     {
         parent::__construct();
@@ -308,7 +310,8 @@ class Home extends CI_Controller {
         $payload = $this->_verify_google_id_token($credential);
 
         if (!$payload) {
-            $this->session->set_flashdata('error', 'Token Google tidak valid atau sudah kadaluarsa.');
+            $debug_msg = $this->_token_error ?: 'Token Google tidak valid atau sudah kadaluarsa.';
+            $this->session->set_flashdata('error', $debug_msg);
             redirect('home/guest_login');
             return;
         }
@@ -374,6 +377,7 @@ class Home extends CI_Controller {
     {
         $parts = explode('.', $id_token);
         if (count($parts) !== 3) {
+            $this->_token_error = 'JWT must have 3 parts';
             return false;
         }
 
@@ -382,12 +386,14 @@ class Home extends CI_Controller {
         // Decode the JWT header to get the key ID (kid)
         $header = json_decode($this->_base64url_decode($header64), true);
         if (!$header || !isset($header['kid'])) {
+            $this->_token_error = 'Header lacks kid or cannot decode';
             return false;
         }
 
         // Fetch Google's current public keys
         $google_keys = $this->_get_google_public_keys();
         if (!$google_keys || !isset($google_keys[$header['kid']])) {
+            $this->_token_error = 'Public key not found for kid: ' . ($header['kid'] ?? 'none');
             return false;
         }
 
@@ -398,6 +404,7 @@ class Home extends CI_Controller {
 
         $pub_key = openssl_pkey_get_public($pem_key);
         if (!$pub_key) {
+            $this->_token_error = 'Failed to get public key from PEM';
             return false;
         }
 
@@ -405,38 +412,45 @@ class Home extends CI_Controller {
         openssl_pkey_free($pub_key);
 
         if (!$valid) {
+            $this->_token_error = 'Signature verification failed. openssl_error: ' . openssl_error_string();
             return false;
         }
 
         // Decode and validate claims
         $payload = json_decode($this->_base64url_decode($payload64), true);
         if (!$payload) {
+            $this->_token_error = 'Failed to decode payload';
             return false;
         }
 
         // Validate issuer
         $valid_issuers = ['accounts.google.com', 'https://accounts.google.com'];
         if (!in_array($payload['iss'] ?? '', $valid_issuers)) {
+            $this->_token_error = 'Invalid issuer: ' . ($payload['iss'] ?? 'none');
             return false;
         }
 
         // Validate expiration
         if (isset($payload['exp']) && $payload['exp'] < time()) {
+            $this->_token_error = 'Token expired. exp: ' . $payload['exp'] . ', current time: ' . time() . ', diff: ' . (time() - $payload['exp']) . 's';
             return false;
         }
 
         // Validate audience (client ID) if configured
         $client_id = $this->config->item('google_client_id');
         if (!empty($client_id) && isset($payload['aud']) && $payload['aud'] !== $client_id) {
+            $this->_token_error = 'Audience mismatch. config: ' . $client_id . ', payload: ' . ($payload['aud'] ?? 'none');
             return false;
         }
 
         // Validate email is present and verified
         if (empty($payload['email']) || !filter_var($payload['email'], FILTER_VALIDATE_EMAIL)) {
+            $this->_token_error = 'Invalid email or email missing';
             return false;
         }
 
         if (isset($payload['email_verified']) && $payload['email_verified'] !== true) {
+            $this->_token_error = 'Email not verified by Google';
             return false;
         }
 
@@ -524,12 +538,15 @@ class Home extends CI_Controller {
         // Build DER-encoded SubjectPublicKeyInfo structure
         $modulus_tlv  = "\x02" . $this->_der_length(strlen($modulus)) . $modulus;
         $exponent_tlv = "\x02" . $this->_der_length(strlen($exponent)) . $exponent;
-        $public_key   = "\x03" . $this->_der_length(strlen($modulus_tlv) . strlen($exponent_tlv)) . "\x00" . $modulus_tlv . $exponent_tlv;
+        // Wrap modulus and exponent in an ASN.1 SEQUENCE (RSAPublicKey)
+        $rsa_sequence = "\x30" . $this->_der_length(strlen($modulus_tlv) + strlen($exponent_tlv)) . $modulus_tlv . $exponent_tlv;
+        // Wrap the SEQUENCE in a BIT STRING (leading \x00 = 0 unused bits)
+        $public_key   = "\x03" . $this->_der_length(1 + strlen($rsa_sequence)) . "\x00" . $rsa_sequence;
 
         // Algorithm identifier: rsaEncryption (OID 1.2.840.113549.1.1.1) with NULL
         $alg_id = "\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00";
 
-        $spki = "\x30" . $this->_der_length(strlen($alg_id) . strlen($public_key)) . $alg_id . $public_key;
+        $spki = "\x30" . $this->_der_length(strlen($alg_id) + strlen($public_key)) . $alg_id . $public_key;
 
         return "-----BEGIN PUBLIC KEY-----\n" . chunk_split(base64_encode($spki), 64, "\n") . "-----END PUBLIC KEY-----\n";
     }
@@ -788,5 +805,327 @@ class Home extends CI_Controller {
         $data['is_lunas'] = in_array($status, ['lunas', 'selesai', 'siap_berangkat', 'sedang_berlangsung']);
 
         $this->load->view('public/kwitansi', $data);
+    }
+
+    /**
+     * Build raw ESC/POS print data for a booking (without sending to printer).
+     *
+     * @param array $booking  Booking data from DB
+     * @param int   $jumlah_hari
+     * @param float $dp_amount
+     * @param bool  $is_lunas
+     * @return string  Raw binary print data
+     */
+    private function _build_print_data($booking, $jumlah_hari, $dp_amount, $is_lunas)
+    {
+        $buffer = new \Mike42\Escpos\PrintConnectors\DummyPrintConnector();
+        $printer = new \Mike42\Escpos\Printer($buffer);
+
+        // 1. Header Struk
+        $printer->setJustification(\Mike42\Escpos\Printer::JUSTIFY_CENTER);
+        $printer->selectPrintMode(\Mike42\Escpos\Printer::MODE_DOUBLE_WIDTH | \Mike42\Escpos\Printer::MODE_DOUBLE_HEIGHT);
+        $printer->text("DHEEMOBILINDO\n");
+        $printer->selectPrintMode(); // Reset to normal
+        $printer->text("Sewa Bus Pariwisata Bandung\n");
+        $printer->text("Telp: 0812-3456-7890\n");
+        $printer->text("================================\n");
+
+        // 2. Info Transaksi
+        $printer->setJustification(\Mike42\Escpos\Printer::JUSTIFY_LEFT);
+        $printer->text("Invoice: #BK-" . str_pad($booking['booking_id'], 4, '0', STR_PAD_LEFT) . "\n");
+        $printer->text("Tanggal: " . date('d/m/Y H:i') . "\n");
+        $printer->text("Nama   : " . substr($booking['customer_nama'], 0, 22) . "\n");
+        $printer->text("Telp   : " . $booking['no_telp'] . "\n");
+        $printer->text("================================\n");
+
+        // 3. Detail Sewa
+        $printer->text("Armada : " . substr($booking['bus_nama'], 0, 22) . "\n");
+        $printer->text("Durasi : " . $jumlah_hari . " Hari (" . date('d M', strtotime($booking['tanggal_keberangkatan'])) . " - " . date('d M', strtotime($booking['tanggal_pulang'])) . ")\n");
+        $printer->text("Rute   : " . substr($booking['lokasi_penjemputan'], 0, 10) . " -> " . substr($booking['tempat_tujuan'], 0, 10) . "\n");
+        $printer->text("================================\n");
+
+        // 4. Perhitungan Biaya
+        $label_total = "Total Harga";
+        $val_total   = "Rp " . number_format($booking['total_harga'], 0, ',', '.');
+        $space_count = 32 - strlen($label_total) - strlen($val_total);
+        if ($space_count < 1) $space_count = 1;
+        $printer->text($label_total . str_repeat(" ", $space_count) . $val_total . "\n");
+
+        if (!$is_lunas) {
+            $label_dp = "DP 30% (+Kode Unik)";
+            $val_dp   = "Rp " . number_format($dp_amount + $booking['kode_unik'], 0, ',', '.');
+            $space_dp = 32 - strlen($label_dp) - strlen($val_dp);
+            if ($space_dp < 1) $space_dp = 1;
+            $printer->text($label_dp . str_repeat(" ", $space_dp) . $val_dp . "\n");
+
+            $label_sisa = "Sisa Pelunasan";
+            $val_sisa   = "Rp " . number_format($booking['total_harga'] - $dp_amount, 0, ',', '.');
+            $space_sisa = 32 - strlen($label_sisa) - strlen($val_sisa);
+            if ($space_sisa < 1) $space_sisa = 1;
+            $printer->text($label_sisa . str_repeat(" ", $space_sisa) . $val_sisa . "\n");
+            
+            $printer->text("--------------------------------\n");
+            $printer->setJustification(\Mike42\Escpos\Printer::JUSTIFY_CENTER);
+            $printer->text("STATUS: BELUM LUNAS (DP PAID)\n");
+        } else {
+            $label_dp = "DP Dibayarkan";
+            $val_dp   = "Rp " . number_format($dp_amount, 0, ',', '.');
+            $space_dp = 32 - strlen($label_dp) - strlen($val_dp);
+            if ($space_dp < 1) $space_dp = 1;
+            $printer->text($label_dp . str_repeat(" ", $space_dp) . $val_dp . "\n");
+
+            $label_pelunasan = "Pelunasan";
+            $val_pelunasan   = "Rp " . number_format($booking['total_harga'] - $dp_amount, 0, ',', '.');
+            $space_pelunasan = 32 - strlen($label_pelunasan) - strlen($val_pelunasan);
+            if ($space_pelunasan < 1) $space_pelunasan = 1;
+            $printer->text($label_pelunasan . str_repeat(" ", $space_pelunasan) . $val_pelunasan . "\n");
+
+            if ($booking['denda'] > 0) {
+                $label_denda = "Denda Keterlambatan";
+                $val_denda   = "Rp " . number_format($booking['denda'], 0, ',', '.');
+                $space_denda = 32 - strlen($label_denda) - strlen($val_denda);
+                if ($space_denda < 1) $space_denda = 1;
+                $printer->text($label_denda . str_repeat(" ", $space_denda) . $val_denda . "\n");
+            }
+
+            $printer->text("--------------------------------\n");
+            $printer->setJustification(\Mike42\Escpos\Printer::JUSTIFY_CENTER);
+            $printer->selectPrintMode(\Mike42\Escpos\Printer::MODE_DOUBLE_WIDTH);
+            $printer->text("LUNAS\n");
+            $printer->selectPrintMode();
+        }
+
+        $printer->text("================================\n");
+        
+        // 5. Footer Struk
+        $printer->setJustification(\Mike42\Escpos\Printer::JUSTIFY_CENTER);
+        $printer->text("Terima kasih atas kepercayaan\n");
+        $printer->text("Anda bersama Dheemobilindo.\n");
+        $printer->text("Semoga perjalanan Anda menyenangkan!\n");
+        
+        $printer->feed(3);
+        $printer->cut();
+        
+        // Ambil data ESC/POS SEBELUM close (karena close akan memicu finalize yg menghapus buffer)
+        $data = $buffer->getData();
+        $printer->close();
+
+        return $data;
+    }
+
+    /**
+     * Send raw print data to a Windows printer via multiple methods.
+     *
+     * @param string $printData    Raw ESC/POS binary data
+     * @param string $printerName  Windows printer / share name
+     * @return string  Name of the method that successfully sent the data
+     * @throws \Exception  If all printing methods fail
+     */
+    private function _send_to_printer($printData, $printerName = 'PrinterKasir')
+    {
+        $errors = [];
+        $hostname = gethostname();
+        if (!$hostname) {
+            $hostname = 'localhost';
+        }
+        $devicePath = "\\\\{$hostname}\\{$printerName}";
+
+        // --- METHOD 1: WindowsPrintConnector (via escpos-php) ---
+        try {
+            $connector = new \Mike42\Escpos\PrintConnectors\WindowsPrintConnector($printerName);
+            $connector->write($printData);
+            $connector->finalize();
+            return 'ESC/POS (WindowsPrintConnector)';
+        } catch (\Throwable $e) {
+            $errors[] = 'ESC/POS: ' . $e->getMessage();
+        }
+
+        // --- METHOD 2: exec() with print /D: command ---
+        try {
+            if (function_exists('exec')) {
+                $tmpFile = tempnam(sys_get_temp_dir(), 'escpos_');
+                if ($tmpFile !== false) {
+                    file_put_contents($tmpFile, $printData);
+                    $cmd = "print /D:\"{$devicePath}\" \"{$tmpFile}\"";
+                    $output = [];
+                    $exitCode = -1;
+                    exec($cmd, $output, $exitCode);
+                    @unlink($tmpFile);
+                    if ($exitCode === 0) {
+                        return 'Print command (exec)';
+                    }
+                    $errors[] = 'Print exec: exit ' . $exitCode . ' — ' . implode(' ', $output);
+                }
+            } else {
+                $errors[] = 'Print exec: exec tidak tersedia';
+            }
+        } catch (\Throwable $e) {
+            $errors[] = 'Print exec: ' . $e->getMessage();
+        }
+
+        // --- METHOD 3: Direct copy to UNC printer path ---
+        try {
+            $tmpFile = tempnam(sys_get_temp_dir(), 'escpos_');
+            if ($tmpFile !== false) {
+                file_put_contents($tmpFile, $printData);
+                if (@copy($tmpFile, $devicePath)) {
+                    @unlink($tmpFile);
+                    return 'Copy to UNC (' . $devicePath . ')';
+                }
+                @unlink($tmpFile);
+            }
+            $errors[] = 'Copy: Gagal copy ke ' . $devicePath;
+        } catch (\Throwable $e) {
+            $errors[] = 'Copy: ' . $e->getMessage();
+        }
+
+        // --- METHOD 4: PowerShell Out-Printer ---
+        try {
+            if (function_exists('exec')) {
+                $tmpFile = tempnam(sys_get_temp_dir(), 'escpos_');
+                if ($tmpFile !== false) {
+                    file_put_contents($tmpFile, $printData);
+                    $psCmd = "powershell -Command \"Get-Content -Encoding Byte '{$tmpFile}' | Out-Printer -Name '{$printerName}'\"";
+                    $psOutput = [];
+                    $psExitCode = -1;
+                    exec($psCmd, $psOutput, $psExitCode);
+                    @unlink($tmpFile);
+                    if ($psExitCode === 0) {
+                        return 'PowerShell Out-Printer';
+                    }
+                    $errors[] = "PowerShell: exit {$psExitCode} — " . implode(' ', $psOutput);
+                }
+            } else {
+                $errors[] = 'PowerShell: exec tidak tersedia';
+            }
+        } catch (\Throwable $e) {
+            $errors[] = 'PowerShell: ' . $e->getMessage();
+        }
+
+        // --- METHOD 5: Scheduled Task as INTERACTIVE user ---
+        // This runs print /D: as the currently logged-in Windows user (who has printer access)
+        try {
+            if (function_exists('exec')) {
+                $tmpFile = tempnam(sys_get_temp_dir(), 'escpos_');
+                if ($tmpFile !== false) {
+                    file_put_contents($tmpFile, $printData);
+                    $printCmd = "print /D:\"{$devicePath}\" \"{$tmpFile}\"";
+                    $taskName = 'ThermalPrint_' . date('YmdHis') . '_' . rand(100, 999);
+                    
+                    // Create scheduled task (runs as INTERACTIVE user = currently logged on)
+                    // Gunakan waktu 2 menit dari sekarang agar trigger tidak expired
+                    $startTime = date('H:i', strtotime('+2 minutes'));
+                    $startDate = date('Y-m-d');
+                    $createCmd = 'schtasks /Create /SC ONCE /TN "' . $taskName . '" /TR "' . $printCmd . '" /ST ' . $startTime . ' /SD ' . $startDate . ' /RU INTERACTIVE /F 2>&1';
+                    $createOut = [];
+                    $createExit = -1;
+                    exec($createCmd, $createOut, $createExit);
+                    
+                    if ($createExit === 0) {
+                        // Run the task immediately (bypass scheduled time)
+                        $runCmd = 'schtasks /Run /TN "' . $taskName . '" 2>&1';
+                        $runOut = [];
+                        $runExit = -1;
+                        exec($runCmd, $runOut, $runExit);
+                        
+                        // Tunggu 3 detik agar task sempat mulai sebelum dihapus
+                        sleep(3);
+                        
+                        // Hapus task dari scheduler
+                        $delCmd = 'schtasks /Delete /TN "' . $taskName . '" /F 2>&1';
+                        exec($delCmd);
+                        @unlink($tmpFile);
+                        
+                        if ($runExit === 0) {
+                            return 'Scheduled Task (INTERACTIVE)';
+                        }
+                        $errors[] = "SchedTask: run exit {$runExit} — " . implode(' ', $runOut);
+                    } else {
+                        @unlink($tmpFile);
+                        $errors[] = "SchedTask: create exit {$createExit} — " . implode(' ', $createOut);
+                    }
+                }
+            } else {
+                $errors[] = 'SchedTask: exec tidak tersedia';
+            }
+        } catch (\Throwable $e) {
+            $errors[] = 'SchedTask: ' . $e->getMessage();
+        }
+
+        // --- All methods failed ---
+        throw new \Exception(implode(' | ', $errors));
+    }
+
+    /**
+     * Cetak Struk ke Printer Thermal Kasir (Iware)
+     * Mendukung multiple fallback method untuk kompatibilitas maksimal.
+     */
+    public function cetak_thermal($booking_id = null)
+    {
+        // Bersihkan output buffer agar response JSON selalu murni
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        
+        header('Content-Type: application/json');
+        @ini_set('display_errors', 0);
+
+        if (!$booking_id) {
+            echo json_encode(['status' => 'error', 'message' => 'ID Booking tidak valid.']);
+            return;
+        }
+
+        $booking_id = (int) $booking_id;
+        $customer_id = $this->session->userdata('guest_id');
+
+        // Query data booking lengkap
+        $this->db->select('booking.*, bus.bus_nama, bus.kapasitas, bus.tipe_bus, bus.harga_dalam_kota, bus.harga_luar_kota, customer.nama as customer_nama, customer.tlp as no_telp, customer.alamat');
+        $this->db->from('booking');
+        $this->db->join('bus', 'bus.bus_id = booking.bus_id', 'left');
+        $this->db->join('customer', 'customer.customer_id = booking.customer_id', 'left');
+        $this->db->where('booking.booking_id', $booking_id);
+        $booking = $this->db->get()->row_array();
+
+        if (!$booking) {
+            echo json_encode(['status' => 'error', 'message' => 'Data booking tidak ditemukan atau Anda tidak memiliki akses.']);
+            return;
+        }
+
+        // Hitung jumlah hari sewa
+        $d1 = new DateTime($booking['tanggal_keberangkatan']);
+        $d2 = new DateTime($booking['tanggal_pulang']);
+        $jumlah_hari = max($d1->diff($d2)->days, 1);
+        $dp_amount = $booking['dp_nominal'] ?? (0.3 * $booking['total_harga']);
+        
+        $status = $booking['booking_status'];
+        $is_lunas = in_array($status, ['lunas', 'selesai', 'siap_berangkat', 'sedang_berlangsung']);
+
+        // Step 1: Build print data in memory (without sending to printer yet)
+        try {
+            $printData = $this->_build_print_data($booking, $jumlah_hari, $dp_amount, $is_lunas);
+        } catch (\Throwable $e) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Gagal menyusun data cetak: ' . $e->getMessage()
+            ]);
+            return;
+        }
+
+        // Step 2: Try to send data to printer using all available methods
+        $printer_name = 'PrinterKasir';
+        try {
+            $method = $this->_send_to_printer($printData, $printer_name);
+            echo json_encode([
+                'status' => 'success',
+                'method' => $method,
+                'hostname' => gethostname(),
+                'device_path' => '\\\\' . gethostname() . '\\' . $printer_name
+            ]);
+        } catch (\Throwable $e) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Gagal mencetak. Semua metode percobaan gagal: ' . $e->getMessage()
+            ]);
+        }
     }
 }

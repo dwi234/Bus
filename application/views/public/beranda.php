@@ -22,18 +22,17 @@
         <div class="row align-items-center justify-content-center" style="min-height: 100vh; padding: 100px 0 80px;">
 
             <!-- LEFT COLUMN: Text + Badges -->
-            <div class="col-lg-6 col-md-10 col-12 mb-5 mb-lg-0">
+            <div class="col-lg-8 col-md-10 col-12 mb-5 mb-lg-0 text-center text-lg-start">
                 <h1 class="hero-title-1">Travel as friends</h1>
                 <h1 class="hero-title-2">
                     return as <span class="hero-accent">family</span>
                 </h1>
-
-                <p class="hero-description">
+                <p class="hero-description mx-auto mx-lg-0">
                     Pengalaman perjalanan premium dengan armada modern, mengutamakan kenyamanan, keamanan, dan pelayanan terbaik untuk Anda dan keluarga.
                 </p>
 
                 <!-- Premium Badges -->
-                <div class="hero-badges">
+                <div class="hero-badges justify-content-center justify-content-lg-start">
                     <span class="hero-badge">
                         <i class="fas fa-star"></i> Premium Vehicles
                     </span>
@@ -46,7 +45,7 @@
                 </div>
 
                 <!-- Stats Row -->
-                <div class="hero-stats">
+                <div class="hero-stats mx-auto mx-lg-0">
                     <div class="hero-stat">
                         <span class="hero-stat-number">50+</span>
                         <span class="hero-stat-label">Armada</span>
@@ -64,52 +63,7 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: Glassmorphic Booking Card -->
-            <div class="col-lg-5 col-md-8 col-12 offset-lg-1">
-                <div class="hero-booking-card">
-                    <h4 class="booking-card-title">Reserve Your Journey</h4>
-                    <p class="booking-card-subtitle">Temukan armada premium untuk perjalanan Anda</p>
-
-                    <form id="heroSearchForm" method="GET" action="<?= base_url('home/booking_page') ?>">
-                        <!-- Pickup Location -->
-                        <div class="hero-input-group">
-                            <div class="hero-input-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            <input type="text" name="pickup" id="hero_pickup" placeholder="Lokasi Penjemputan" autocomplete="off" class="hero-input">
-                        </div>
-
-                        <!-- Destination -->
-                        <div class="hero-input-group">
-                            <div class="hero-input-icon"><i class="fas fa-flag-checkered"></i></div>
-                            <input type="text" name="destination" id="hero_destination" placeholder="Tempat Tujuan" autocomplete="off" class="hero-input">
-                        </div>
-
-                        <!-- Date -->
-                        <div class="hero-input-group">
-                            <div class="hero-input-icon"><i class="fas fa-calendar-alt"></i></div>
-                            <input type="date" name="date" id="hero_date" min="<?= date('Y-m-d') ?>" class="hero-input" style="color-scheme: dark;">
-                        </div>
-
-                        <!-- Capacity -->
-                        <div class="hero-input-group">
-                            <div class="hero-input-icon"><i class="fas fa-users"></i></div>
-                            <select name="capacity" id="hero_capacity" class="hero-input hero-select">
-                                <option value="" style="background: #1a2a3a; color: #ccc;">Kapasitas Penumpang</option>
-                                <option value="15" style="background: #1a2a3a; color: #fff;">15 Kursi (Mini Bus)</option>
-                                <option value="25" style="background: #1a2a3a; color: #fff;">25 Kursi (Medium Bus)</option>
-                                <option value="30" style="background: #1a2a3a; color: #fff;">30 Kursi (Big Bus)</option>
-                                <option value="50" style="background: #1a2a3a; color: #fff;">50 Kursi (Executive Bus)</option>
-                                <option value="60" style="background: #1a2a3a; color: #fff;">60 Kursi (Super Big Bus)</option>
-                            </select>
-                            <div class="hero-select-arrow"><i class="fas fa-chevron-down"></i></div>
-                        </div>
-
-                        <!-- CTA Button -->
-                        <button type="submit" id="heroCheckBtn" class="hero-cta-btn">
-                            Check Availability &nbsp;→
-                        </button>
-                    </form>
-                </div>
-            </div>
+            <!-- RIGHT COLUMN: (removed - booking card was here) -->
 
         </div>
     </div>
@@ -186,6 +140,7 @@
         .hero-content-container {
             position: relative;
             z-index: 5;
+            padding-left: 0;
         }
 
         /* ── Titles ── */
@@ -285,99 +240,6 @@
             background: rgba(255,255,255,0.1);
         }
 
-        /* ── Booking Card ── */
-        .hero-booking-card {
-            background: rgba(16, 24, 40, 0.78);
-            backdrop-filter: blur(28px) saturate(1.3);
-            -webkit-backdrop-filter: blur(28px) saturate(1.3);
-            border-radius: 24px;
-            padding: 38px 32px;
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03) inset;
-        }
-        .booking-card-title {
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 1.35rem;
-            margin-bottom: 6px;
-        }
-        .booking-card-subtitle {
-            color: rgba(255,255,255,0.42);
-            font-size: 0.85rem;
-            margin-bottom: 28px;
-        }
-
-        /* ── Form Inputs ── */
-        .hero-input-group {
-            position: relative;
-            margin-bottom: 16px;
-        }
-        .hero-input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #E0A96D;
-            font-size: 0.9rem;
-            z-index: 2;
-            pointer-events: none;
-        }
-        .hero-input {
-            width: 100%;
-            padding: 15px 16px 15px 42px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.06);
-            color: #ffffff;
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            outline: none;
-            transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
-        }
-        .hero-input:focus {
-            border-color: rgba(224,169,109,0.5);
-            background: rgba(255,255,255,0.1);
-            box-shadow: 0 0 0 3px rgba(224,169,109,0.08);
-        }
-        .hero-input::placeholder { color: rgba(255,255,255,0.35); }
-        .hero-select {
-            appearance: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-            color: rgba(255,255,255,0.65);
-        }
-        .hero-select-arrow {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255,255,255,0.3);
-            font-size: 0.75rem;
-            pointer-events: none;
-        }
-        .hero-input-group:last-of-type { margin-bottom: 28px; }
-
-        /* ── CTA Button ── */
-        .hero-cta-btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #E0A96D 0%, #C8894A 100%);
-            color: #0f1923;
-            font-size: 1rem;
-            font-weight: 700;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 24px rgba(224,169,109,0.3);
-        }
-        .hero-cta-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 36px rgba(224,169,109,0.5);
-        }
-
         /* ── 3D Controls (bottom-left) ── */
         #hero3dControls {
             position: absolute;
@@ -437,7 +299,6 @@
         @media (max-width: 575px) {
             .hero-title-1 { font-size: 2rem; }
             .hero-title-2 { font-size: 1.7rem; }
-            .hero-booking-card { padding: 28px 20px; }
             .hero-stats { gap: 16px; padding: 14px 16px; }
             #hero3dControls { bottom: 70px; }
             .ctrl-btn span { display: none; }
@@ -445,83 +306,451 @@
     </style>
 </section>
 
-<!-- TENTANG KAMI SECTION -->
-<section id="tentang_kami" class="about-section py-5" style="background-color: #ffffff;">
-    <div class="container py-4">
+<!-- ===================== TENTANG KAMI SECTION ===================== -->
+<section id="tentang_kami" class="about-section">
+    <div class="container">
+        <!-- Section Header -->
         <div class="row mb-5">
-            <div class="col-lg-12 col-12 text-center">
-                <h2 class="mb-4 fw-bold" style="color: #1e293b;">Tentang Dheemobilindo</h2>
+            <div class="col-12 text-center">
+                <span class="about-section-badge">Tentang Kami</span>
+                <h2 class="about-section-title">Mengenal <span class="about-accent">Dheemobilindo</span></h2>
+                <p class="about-section-subtitle">
+                    Mitra perjalanan terpercaya untuk pengalaman wisata yang tak terlupakan.
+                </p>
             </div>
         </div>
 
-        <div class="row align-items-center justify-content-center mb-5 pb-5">
+        <!-- Content Row -->
+        <div class="row align-items-center justify-content-between">
+            <!-- Image Column -->
             <div class="col-lg-6 col-md-10 col-12 mb-5 mb-lg-0">
-                <img src="<?= base_url('assets/img/bus_hero.png') ?>" class="img-fluid d-block" alt="Armada Dheemobilindo" style="width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 16px; box-shadow: 0 12px 35px rgba(0,0,0,0.15);">
+                <div class="about-image-wrapper">
+                    <div class="about-image-accent"></div>
+                    <img src="<?= base_url('assets/img/bus/3473fb8ea2fe44e83aec89a65399e184.jpeg') ?>" alt="Armada Dheemobilindo" class="about-image">
+                    <div class="about-image-badge">
+                        <i class="fas fa-star"></i> 50+ Armada Premium
+                    </div>
+                </div>
             </div>
 
-            <div class="col-lg-5 col-md-10 col-12 offset-lg-1 d-flex flex-column justify-content-center">
-                <h5 style="color: #475467; font-weight: 600; font-size: 1.15rem; margin-bottom: 24px;">Mengenal Dheemobilindo Lebih Dekat</h5>
-                <p style="color: #667085; font-size: 0.95rem; line-height: 1.7; text-align: justify; margin-bottom: 24px;">
+            <!-- Text Column -->
+            <div class="col-lg-5 col-md-10 col-12">
+                <h3 class="about-heading">Komitmen Kami untuk Perjalanan Anda</h3>
+                
+                <p class="about-text">
                     Kami adalah penyedia layanan penyewaan armada bus premium yang berdedikasi untuk memberikan pengalaman perjalanan yang aman, nyaman, dan tak terlupakan. Dengan pilihan armada terlengkap yang selalu dalam kondisi prima serta didukung oleh pengemudi profesional, Dheemobilindo siap melayani segala kebutuhan perjalanan Anda mulai dari wisata keluarga, kunjungan industri, hingga acara perusahaan di seluruh Indonesia.
                 </p>
                 
-                <div style="background-color: #f5f8ff; border-left: 4px solid #1a3bb5; padding: 24px; border-radius: 0 12px 12px 0; margin-top: 8px;">
-                    <p style="color: #1a3bb5; font-style: italic; font-weight: 600; font-size: 0.95rem; margin: 0; line-height: 1.6;">
-                        "Melayani dengan komitmen penuh pada kualitas, kenyamanan, dan ketepatan waktu."
+                <!-- Quote Block -->
+                <div class="about-quote-block">
+                    <i class="fas fa-quote-left about-quote-icon"></i>
+                    <p class="about-quote-text">
+                        Melayani dengan komitmen penuh pada kualitas, kenyamanan, dan ketepatan waktu.
                     </p>
+                </div>
+
+                <!-- Mini Stats -->
+                <div class="about-mini-stats">
+                    <div class="about-mini-stat">
+                        <span class="about-mini-number">10+</span>
+                        <span class="about-mini-label">Tahun Pengalaman</span>
+                    </div>
+                    <div class="about-mini-stat">
+                        <span class="about-mini-number">100+</span>
+                        <span class="about-mini-label">Kota Tujuan</span>
+                    </div>
+                    <div class="about-mini-stat">
+                        <span class="about-mini-number">50+</span>
+                        <span class="about-mini-label">Armada Siap</span>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Divider -->
+        <div class="about-divider"></div>
+
         <!-- Mengapa Memilih Kami Section -->
-        <div class="row mt-5 pt-4">
+        <div class="row">
             <div class="col-12 text-center mb-5">
-                <h6 style="color: #475467; font-weight: 600; margin-bottom: 12px; font-size: 1.05rem;">Mengapa Memilih Kami?</h6>
-                <p style="color: #667085; font-size: 0.95rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">Komitmen kami untuk memberikan pengalaman perjalanan yang tak terlupakan dengan standar layanan tertinggi.</p>
+                <span class="about-section-badge">Keunggulan</span>
+                <h2 class="about-section-title">Mengapa Memilih <span class="about-accent">Kami</span>?</h2>
+                <p class="about-section-subtitle">
+                    Komitmen kami untuk memberikan pengalaman perjalanan yang tak terlupakan dengan standar layanan tertinggi.
+                </p>
             </div>
+        </div>
 
-            <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div style="background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; padding: 40px 24px; text-align: center; height: 100%; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 12px 24px rgba(0,0,0,0.06)'; this.style.transform='translateY(-4px)';" onmouseout="this.style.boxShadow='none'; this.style.transform='none';">
-                    <div style="width: 54px; height: 54px; background: #e0f2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-                        <i class="fas fa-shield-alt" style="color: #0284c7; font-size: 1.3rem;"></i>
+        <div class="row g-4">
+            <!-- Card 1 -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="about-card">
+                    <div class="about-card-icon about-icon-blue">
+                        <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h5 style="color: #334155; font-size: 1rem; font-weight: 600; margin-bottom: 12px;">Keamanan Terjamin</h5>
-                    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.7; margin: 0;">Armada terawat secara berkala dengan standar keamanan operasional yang ketat.</p>
+                    <h5 class="about-card-title">Keamanan Terjamin</h5>
+                    <p class="about-card-text">Armada terawat secara berkala dengan standar keamanan operasional yang ketat untuk perjalanan yang tenang.</p>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div style="background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; padding: 40px 24px; text-align: center; height: 100%; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 12px 24px rgba(0,0,0,0.06)'; this.style.transform='translateY(-4px)';" onmouseout="this.style.boxShadow='none'; this.style.transform='none';">
-                    <div style="width: 54px; height: 54px; background: #e0f2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-                        <i class="fas fa-bus" style="color: #0284c7; font-size: 1.3rem;"></i>
+            <!-- Card 2 -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="about-card">
+                    <div class="about-card-icon about-icon-gold">
+                        <i class="fas fa-bus"></i>
                     </div>
-                    <h5 style="color: #334155; font-size: 1rem; font-weight: 600; margin-bottom: 12px;">Armada Mewah</h5>
-                    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.7; margin: 0;">Fasilitas premium dalam kabin untuk kenyamanan maksimal sepanjang perjalanan.</p>
+                    <h5 class="about-card-title">Armada Mewah</h5>
+                    <p class="about-card-text">Fasilitas premium dalam kabin dengan kursi ergonomis, AC, hiburan, dan kenyamanan maksimal.</p>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div style="background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; padding: 40px 24px; text-align: center; height: 100%; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 12px 24px rgba(0,0,0,0.06)'; this.style.transform='translateY(-4px)';" onmouseout="this.style.boxShadow='none'; this.style.transform='none';">
-                    <div style="width: 54px; height: 54px; background: #e0f2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-                        <i class="fas fa-id-badge" style="color: #0284c7; font-size: 1.3rem;"></i>
+            <!-- Card 3 -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="about-card">
+                    <div class="about-card-icon about-icon-green">
+                        <i class="fas fa-id-badge"></i>
                     </div>
-                    <h5 style="color: #334155; font-size: 1rem; font-weight: 600; margin-bottom: 12px;">Driver Profesional</h5>
-                    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.7; margin: 0;">Pengemudi berpengalaman dan bersertifikat yang memahami rute dengan baik.</p>
+                    <h5 class="about-card-title">Driver Profesional</h5>
+                    <p class="about-card-text">Pengemudi berpengalaman dan bersertifikat yang mengutamakan keselamatan serta menguasai rute.</p>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div style="background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; padding: 40px 24px; text-align: center; height: 100%; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 12px 24px rgba(0,0,0,0.06)'; this.style.transform='translateY(-4px)';" onmouseout="this.style.boxShadow='none'; this.style.transform='none';">
-                    <div style="width: 54px; height: 54px; background: #e0f2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-                        <i class="fas fa-tag" style="color: #0284c7; font-size: 1.3rem;"></i>
+            <!-- Card 4 -->
+            <div class="col-lg-3 col-md-6 col-12">
+                <div class="about-card">
+                    <div class="about-card-icon about-icon-purple">
+                        <i class="fas fa-tag"></i>
                     </div>
-                    <h5 style="color: #334155; font-size: 1rem; font-weight: 600; margin-bottom: 12px;">Harga Terbaik</h5>
-                    <p style="color: #64748b; font-size: 0.85rem; line-height: 1.7; margin: 0;">Penawaran harga transparan dan kompetitif tanpa biaya tersembunyi.</p>
+                    <h5 class="about-card-title">Harga Terbaik</h5>
+                    <p class="about-card-text">Penawaran harga transparan dan kompetitif tanpa biaya tersembunyi dengan nilai terbaik untuk Anda.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- ===================== TENTANG KAMI STYLES ===================== -->
+<style>
+/* ── Section ── */
+.about-section {
+    padding: 90px 0;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-section::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -150px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(224,169,109,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.about-section::after {
+    content: '';
+    position: absolute;
+    bottom: -120px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(26,59,181,0.05) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* ── Section Header ── */
+.about-section-badge {
+    display: inline-block;
+    padding: 6px 20px;
+    border-radius: 50px;
+    background: rgba(224,169,109,0.1);
+    border: 1px solid rgba(224,169,109,0.25);
+    color: #C8894A;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+}
+
+.about-section-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 12px;
+    line-height: 1.2;
+}
+
+.about-accent {
+    color: #C8894A;
+    border-bottom: 3px solid rgba(224,169,109,0.3);
+    padding-bottom: 2px;
+}
+
+.about-section-subtitle {
+    color: #64748b;
+    font-size: 1.05rem;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* ── Image Column ── */
+.about-image-wrapper {
+    position: relative;
+}
+
+.about-image-accent {
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(224,169,109,0.2);
+    border-radius: 20px;
+    z-index: 0;
+}
+
+.about-image {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.about-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+}
+
+.about-image-badge {
+    position: absolute;
+    bottom: -14px;
+    right: 20px;
+    z-index: 2;
+    background: linear-gradient(135deg, #E0A96D 0%, #C8894A 100%);
+    color: #0f1923;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(224,169,109,0.35);
+}
+
+.about-image-badge i {
+    margin-right: 6px;
+}
+
+/* ── Text Column ── */
+.about-heading {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
+.about-text {
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 24px;
+    text-align: justify;
+}
+
+/* ── Quote Block ── */
+.about-quote-block {
+    position: relative;
+    background: linear-gradient(135deg, #fefcf8 0%, #fdf6ee 100%);
+    border-left: 4px solid #E0A96D;
+    padding: 20px 24px 20px 28px;
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 28px;
+}
+
+.about-quote-icon {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    color: rgba(224,169,109,0.15);
+    font-size: 1.8rem;
+}
+
+.about-quote-text {
+    color: #7a5c3a;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.7;
+}
+
+/* ── Mini Stats ── */
+.about-mini-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.about-mini-stat {
+    text-align: center;
+    padding: 14px 20px;
+    background: #f8fafc;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+    flex: 1;
+    min-width: 90px;
+    transition: all 0.3s ease;
+}
+
+.about-mini-stat:hover {
+    background: #fefcf8;
+    border-color: rgba(224,169,109,0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+}
+
+.about-mini-number {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #C8894A;
+    line-height: 1.2;
+}
+
+.about-mini-label {
+    display: block;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 600;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Divider ── */
+.about-divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #E0A96D, rgba(224,169,109,0.2));
+    border-radius: 2px;
+    margin: 60px auto;
+}
+
+/* ── Cards ── */
+.about-card {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 18px;
+    padding: 40px 28px;
+    text-align: center;
+    height: 100%;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.about-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #E0A96D, #C8894A);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.about-card:hover::before {
+    transform: scaleX(1);
+}
+
+.about-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.06);
+    border-color: rgba(224,169,109,0.15);
+}
+
+.about-card-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 22px;
+    font-size: 1.4rem;
+    transition: all 0.4s ease;
+}
+
+.about-card:hover .about-card-icon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.about-icon-blue {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.about-icon-gold {
+    background: #fef3e7;
+    color: #C8894A;
+}
+
+.about-icon-green {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.about-icon-purple {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.about-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+}
+
+.about-card-text {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .about-section { padding: 70px 0; }
+    .about-section-title { font-size: 2rem; }
+    .about-heading { font-size: 1.4rem; }
+    .about-image-accent { display: none; }
+}
+
+@media (max-width: 575px) {
+    .about-section { padding: 50px 0; }
+    .about-section-title { font-size: 1.6rem; }
+    .about-heading { font-size: 1.2rem; }
+    .about-mini-stats { gap: 12px; }
+    .about-mini-stat { padding: 12px 14px; min-width: 70px; }
+    .about-image-badge { bottom: -10px; right: 10px; padding: 8px 14px; font-size: 0.75rem; }
+    .about-card { padding: 32px 20px; }
+    .about-quote-icon { display: none; }
+}
+</style>
 
 <!-- ===================== GALLERY SECTION ===================== -->
 <section id="galeri" class="gallery-section py-5" style="background-color: #f8fafc; border-top: 1px solid #eaecf0;">
@@ -587,18 +816,6 @@
                         <div class="bento-icon"><i class="fas fa-couch"></i></div>
                         <h5>Interior Mewah</h5>
                         <p>Fasilitas Lengkap</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Item 4 (Tall - Wisatawan) -->
-            <div class="bento-item item-tall" data-category="wisatawan" onclick="openLightbox(this)">
-                <img src="<?= base_url('assets/img/bus/1b3d1e20b415c2d50ca62d8579d9086b.jpeg') ?>" alt="Trip Keluarga">
-                <div class="bento-overlay">
-                    <div class="bento-content">
-                        <div class="bento-icon"><i class="fas fa-users"></i></div>
-                        <h5>Gathering Keluarga</h5>
-                        <p>Aman dan Nyaman</p>
                     </div>
                 </div>
             </div>
